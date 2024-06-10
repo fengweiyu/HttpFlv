@@ -1,7 +1,7 @@
 /*****************************************************************************
 * Copyright (C) 2020-2025 Hanson Yu  All rights reserved.
 ------------------------------------------------------------------------------
-* File Module           :       HlsServer.cpp
+* File Module           :       HttpFlvServer.cpp
 * Description           : 	    为了应对短连接，server设计成常驻对象
 注意，成员变量要做多线程竞争保护
 * Created               :       2022.01.13.
@@ -10,8 +10,8 @@
 * Last Modified         : 	
 * History               : 	
 ******************************************************************************/
-#include "HlsServer.h"
-#include "HlsServerCom.h"
+#include "HttpFlvServer.h"
+#include "HttpFlvServerCom.h"
 #include <regex>
 #include <string>
 #include <stdlib.h>
@@ -22,6 +22,11 @@
 using std::string;
 using std::smatch;
 using std::regex;
+
+
+#define HTTP_FLV_CLIENT_VLC    "VLC"
+
+
 
 #define HTTP_FLV_MAX_MATCH_NUM       8
 
@@ -243,8 +248,9 @@ int HttpFlvServer::HandleHttpReq(const char * i_strReq,char *o_strRes,int i_iRes
         {
             string strStreamType(astrRegex[1].c_str());//file
             string strFileName(astrRegex[2].c_str());
+            strFileName.append(".flv");
             FLV_LOGW("%d,file m_pFileName %s\r\n",iRet,strFileName.c_str());
-            iRet = HandleReqGetFlv(&strFileName,o_strRes,i_iResMaxLen);
+            iRet = HandleReqGetFlv(tHttpReqPacket.strUserAgent,&strFileName,o_strRes,i_iResMaxLen);
             return iRet;
         } 
     }
@@ -269,7 +275,7 @@ int HttpFlvServer::HandleHttpReq(const char * i_strReq,char *o_strRes,int i_iRes
 * -----------------------------------------------
 * 2020/01/13      V1.0.0              Yu Weifeng       Created
 ******************************************************************************/
-int HttpFlvServer::HandleReqGetFlv(string *i_pPlaySrc,char *o_strRes,int i_iResMaxLen)
+int HttpFlvServer::HandleReqGetFlv(char *i_strUser,string *i_pPlaySrc,char *o_strRes,int i_iResMaxLen)
 {
     int iRet = -1;
     char *pcFlv = NULL;
@@ -283,7 +289,14 @@ int HttpFlvServer::HandleReqGetFlv(string *i_pPlaySrc,char *o_strRes,int i_iResM
     
     if(NULL == m_pHttpFlvServerSession)
     {
-        m_pHttpFlvServerSession = new HttpFlvServerSession((char *)i_pPlaySrc->c_str());
+        if(NULL != i_strUser&&(NULL != strstr(i_strUser,HTTP_FLV_CLIENT_VLC)))
+        {
+            m_pHttpFlvServerSession = new HttpFlvServerSession((char *)i_pPlaySrc->c_str(),1);
+        }
+        else
+        {
+            m_pHttpFlvServerSession = new HttpFlvServerSession((char *)i_pPlaySrc->c_str());
+        }
     }
     pcFlv = new char [HTTP_FLV_MAX_LEN];//后续优化
     iFlvLen = m_pHttpFlvServerSession->GetFlv(pcFlv,HTTP_FLV_MAX_LEN);
@@ -366,7 +379,7 @@ int HttpFlvServer::Regex(const char *i_strPattern,char *i_strBuf,string * o_aMat
     {
         if((int)Match.size()<=0 || i_iMatchMaxCnt < (int)Match.size())
         {
-            HLS_LOGE("HlsRegex err i_iMatchMaxCnt %d<%d Match.size()-1 \r\n",i_iMatchMaxCnt,Match.size()-1);
+            FLV_LOGE("HlsRegex err i_iMatchMaxCnt %d<%d Match.size()-1 \r\n",i_iMatchMaxCnt,Match.size()-1);
             return iRet;
         }
         iRet = (int)Match.size();

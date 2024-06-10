@@ -124,7 +124,7 @@ int HttpFlvServerDemo::AddMapServerIO(HttpFlvServerIO * i_pHttpFlvServerIO,int i
 
     if(NULL == i_pHttpFlvServerIO)
     {
-        HLS_LOGE("AddMapServerIO NULL!!!%p\r\n",i_pHttpFlvServerIO);
+        FLV_LOGE("AddMapServerIO NULL!!!%p\r\n",i_pHttpFlvServerIO);
         return -1;
     }
     std::lock_guard<std::mutex> lock(m_MapMtx);//std::lock_guard对象会在其作用域结束时自动释放互斥量

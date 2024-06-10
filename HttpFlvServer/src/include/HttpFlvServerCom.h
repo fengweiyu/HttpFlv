@@ -1,7 +1,7 @@
 /*****************************************************************************
 * Copyright (C) 2020-2025 Hanson Yu  All rights reserved.
 ------------------------------------------------------------------------------
-* File Module           :    HlsServerCom.h
+* File Module           :    HttpFlvServerCom.h
 * Description           :    模块内部与外部调用者共同的依赖，放到对外的include里
 * Created               :    2020.01.13.
 * Author                :    Yu Weifeng
@@ -9,8 +9,8 @@
 * Last Modified         : 	
 * History               : 	
 ******************************************************************************/
-#ifndef HLS_SERVER_COM_H
-#define HLS_SERVER_COM_H
+#ifndef HTTP_FLV_SERVER_COM_H
+#define HTTP_FLV_SERVER_COM_H
 
 
 #ifdef _WIN32

@@ -31,7 +31,7 @@ int main(int argc, char* argv[])
 {
     int iRet = -1;
     
-    int dwServerPort=9212;
+    int dwServerPort=9214;
     
     if(argc !=2)
     {
@@ -41,14 +41,14 @@ int main(int argc, char* argv[])
     {
         dwServerPort=atoi(argv[1]);
     }
-    HttpFlvServerDemo *pHlsServerDemo = new HlsServerDemo(dwServerPort);
-    iRet=pHlsServerDemo->Proc();//×èÈû
+    HttpFlvServerDemo *pServerDemo = new HttpFlvServerDemo(dwServerPort);
+    iRet=pServerDemo->Proc();//×èÈû
     
     return iRet;
 }
 /*****************************************************************************
 -Fuction        : PrintUsage
--Description    : PrintUsage
+-Description    : http://localhost:9214/file/H264AAC.flv
 -Input          : 
 -Output         : 
 -Return         : 
@@ -59,6 +59,7 @@ int main(int argc, char* argv[])
 static void PrintUsage(char *i_strProcName)
 {
     printf("Usage: %s ServerPort \r\n",i_strProcName);
-    printf("run default args: %s 9212 \r\n",i_strProcName);
+    printf("run default args: %s 9214 \r\n",i_strProcName);
+    printf("client input url eg: http://localhost:9214/file/H264AAC.flv\r\n",i_strProcName);
 }
 

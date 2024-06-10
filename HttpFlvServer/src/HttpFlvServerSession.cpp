@@ -9,8 +9,8 @@
 * Last Modified         : 	
 * History               : 	
 ******************************************************************************/
-#include "HlsServerSession.h"
-#include "HlsServerCom.h"
+#include "HttpFlvServerSession.h"
+#include "HttpFlvServerCom.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -117,11 +117,11 @@ int HttpFlvServerSession::GetFlv(char *o_strRes,int i_iResMaxLen)
         iContainerHeaderLen = 0;
         if(0 != m_iEnhancedFlag)
         {
-            iRet=m_pMediaHandle->FrameToContainer(&m_tFileFrameInfo,STREAM_TYPE_FLV_STREAM,o_strRes,i_iResMaxLen,&iContainerHeaderLen);
+            iRet=m_pMediaHandle->FrameToContainer(&m_tFileFrameInfo,STREAM_TYPE_ENHANCED_FLV_STREAM,(unsigned char *)o_strRes,i_iResMaxLen,&iContainerHeaderLen);
         }
         else
         {
-            iRet=m_pMediaHandle->FrameToContainer(&m_tFileFrameInfo,STREAM_TYPE_FLV_STREAM,o_strRes,i_iResMaxLen,&iContainerHeaderLen);
+            iRet=m_pMediaHandle->FrameToContainer(&m_tFileFrameInfo,STREAM_TYPE_FLV_STREAM,(unsigned char *)o_strRes,i_iResMaxLen,&iContainerHeaderLen);
         }
         if(iRet<0 || i_iResMaxLen<iRet)
         {
