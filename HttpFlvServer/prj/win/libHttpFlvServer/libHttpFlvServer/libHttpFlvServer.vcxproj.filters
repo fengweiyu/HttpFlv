@@ -1,0 +1,67 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="src">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="src\include">
+      <UniqueIdentifier>{5dcbe90f-0e1e-4cf1-b29f-7244b5585c90}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\ThirdSrc">
+      <UniqueIdentifier>{b2ace3a2-75b3-407b-8132-1362acb44745}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\ThirdSrc\http">
+      <UniqueIdentifier>{a67b739c-0b01-40ac-ae70-2640badd95d3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\ThirdSrc\http\include">
+      <UniqueIdentifier>{5b30dd3c-8407-4b7a-9568-75c28923e150}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\..\src\HttpFlvServer.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\HttpFlvServerInf.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\HttpFlvServerSession.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\ThirdSrc\http\Http.cpp">
+      <Filter>src\ThirdSrc\http</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\ThirdSrc\http\HttpClient.cpp">
+      <Filter>src\ThirdSrc\http</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\ThirdSrc\http\HttpServer.cpp">
+      <Filter>src\ThirdSrc\http</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\..\src\HttpFlvServer.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\HttpFlvServerSession.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\include\HttpFlvServerCom.h">
+      <Filter>src\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\include\HttpFlvServerInf.h">
+      <Filter>src\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\ThirdSrc\http\Http.h">
+      <Filter>src\ThirdSrc\http</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\ThirdSrc\http\include\HttpClient.h">
+      <Filter>src\ThirdSrc\http\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\ThirdSrc\http\include\HttpCommon.h">
+      <Filter>src\ThirdSrc\http\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\ThirdSrc\http\include\HttpServer.h">
+      <Filter>src\ThirdSrc\http\include</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>
