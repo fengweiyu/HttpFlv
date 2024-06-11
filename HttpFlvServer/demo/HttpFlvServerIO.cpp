@@ -106,7 +106,7 @@ int HttpFlvServerIO :: Proc()
     {
         iRecvLen = 0;
         memset(pcRecvBuf,0,HTTP_FLV_IO_RECV_MAX_LEN);
-        milliseconds timeMS(20);// 表示30毫秒
+        milliseconds timeMS(10);// 表示10毫秒
         iRet=TcpServer::Recv(pcRecvBuf,&iRecvLen,HTTP_FLV_IO_RECV_MAX_LEN,m_iClientSocketFd,&timeMS);
         if(iRet < 0)
         {
