@@ -24,9 +24,9 @@ using std::smatch;
 using std::regex;
 
 
-#define HTTP_FLV_CLIENT_VLC    "VLC"
-
-
+#define HTTP_FLV_CLIENT_VLC         "VLC"
+#define HTTP_FLV_CLIENT_FFPLAY      "Lavf"
+#define HTTP_FLV_CLIENT_CHROME      "Chrome"
 
 #define HTTP_FLV_MAX_MATCH_NUM       8
 
@@ -289,7 +289,7 @@ int HttpFlvServer::HandleReqGetFlv(char *i_strUser,string *i_pPlaySrc,char *o_st
     
     if(NULL == m_pHttpFlvServerSession)
     {
-        if(NULL != i_strUser&&(NULL != strstr(i_strUser,HTTP_FLV_CLIENT_VLC)))
+        if(NULL != i_strUser&&(NULL != strstr(i_strUser,HTTP_FLV_CLIENT_VLC) ||NULL != strstr(i_strUser,HTTP_FLV_CLIENT_FFPLAY) ||NULL != strstr(i_strUser,HTTP_FLV_CLIENT_CHROME)))
         {
             m_pHttpFlvServerSession = new HttpFlvServerSession((char *)i_pPlaySrc->c_str(),1);
         }
