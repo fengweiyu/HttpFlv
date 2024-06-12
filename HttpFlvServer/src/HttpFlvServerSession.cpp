@@ -82,6 +82,7 @@ int HttpFlvServerSession::GetFlv(char *o_strRes,int i_iResMaxLen)
 	int iSleepTimeMS=0;
     unsigned char * pbContainerBuf=NULL;
 	int iContainerHeaderLen=0;
+	int iDiffTimeMS=0;
 	
     if(NULL == o_strRes)
     {
@@ -108,12 +109,13 @@ int HttpFlvServerSession::GetFlv(char *o_strRes,int i_iResMaxLen)
         }
         iSleepTimeMS=(int)(m_tFileFrameInfo.dwTimeStamp-m_dwFileLastTimeStamp);
         unsigned int dwFileCurTick=GetTickCount();
-        if((int)(dwFileCurTick-m_dwFileLastTick) <= iSleepTimeMS)
+        iDiffTimeMS=(int)(dwFileCurTick-m_dwFileLastTick);
+        if(iDiffTimeMS < iSleepTimeMS)
         {
-            SleepMs(iSleepTimeMS-(int)(dwFileCurTick-m_dwFileLastTick));//模拟实时流(直播)，点播和当前的处理机制不匹配，需要后续再开发
+            SleepMs((iSleepTimeMS-iDiffTimeMS));//模拟实时流(直播)，点播和当前的处理机制不匹配，需要后续再开发
         }
         m_dwFileLastTick = GetTickCount();
-
+        
         iContainerHeaderLen = 0;
         if(0 != m_iEnhancedFlag)
         {
