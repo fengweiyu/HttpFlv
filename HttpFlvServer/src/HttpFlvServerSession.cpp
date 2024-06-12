@@ -127,12 +127,18 @@ int HttpFlvServerSession::GetFlv(char *o_strRes,int i_iResMaxLen)
         }
         if(iRet<0 || i_iResMaxLen<iRet)
         {
-            FLV_LOGE("FrameToContainer err exit %d,%d[%s]\r\n",i_iResMaxLen,iRet,m_pPlaySrc->c_str());
+            FLV_LOGE("FrameToContainer err exit %d,%d[%s]\r\n",iRet,i_iResMaxLen,m_pPlaySrc->c_str());
             iRet=-1;
             break;
         }
+        if(0 == iRet)
+        {
+            FLV_LOGW("FrameToContainer need more data %d,%d[%s]\r\n",iRet,i_iResMaxLen,m_pPlaySrc->c_str());
+            continue;
+        }
         m_dwFileLastTimeStamp = m_tFileFrameInfo.dwTimeStamp;
-    }while(0);
+        break;
+    }while(1);
     return iRet;
 }
 /*****************************************************************************
