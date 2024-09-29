@@ -31,7 +31,7 @@ public:
     int HandleHttpReq(const char * i_strReq,char *o_strRes,int i_iResMaxLen);//return ResLen,<0 err
     int GetFLV(char *o_strRes,int i_iResMaxLen);
 private:
-    int HandleReqGetFlv(char *i_strUser,string *i_pPlaySrc,char *o_strRes,int i_iResMaxLen);
+    int HandleReqGetFlv(int i_iEnhancedFlag,string *i_pPlaySrc,char *o_strRes,int i_iResMaxLen);
     int Regex(const char *i_strPattern,char *i_strBuf,string * o_aMatch,int i_iMatchMaxCnt);
     
     HttpFlvServerSession * m_pHttpFlvServerSession;
