@@ -1,0 +1,83 @@
+<html>
+  <head>
+    <title>flv.js demo</title>
+  </head>
+
+  <body>
+    <script src="./flv.min.js"></script>
+
+    <center>
+      <h1><a href="https://github.com/bilibili/flv.js">flv.js demo</a></h1>
+      <textarea name="" id="UrlInput" cols="80" rows="2"></textarea>
+      <div class="box">
+        <button id="startButton">start</button>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<button id="stopButton">stop</button>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<button id="h264Button">h264</button>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<button id="h265Button">h265</button>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<button id="defaultButton">default</button>
+      </div>
+      <video height="600" id="video" controls></video>
+    </center>
+
+    <script>
+      const startButton = document.getElementById('startButton');
+      const stopButton = document.getElementById('stopButton');
+      const h264Button = document.getElementById('h264Button');
+      const h265Button = document.getElementById('h265Button');
+      const defaultButton = document.getElementById('defaultButton');
+      const UrlInput = document.getElementById('UrlInput')
+      UrlInput.value = 'https://yuweifeng.top:9215/file/H264AAC.flv'; 
+      startButton.addEventListener('click', setEnable);
+      stopButton.addEventListener('click', setDisable);
+      h264Button.addEventListener('click', setH264);
+      h265Button.addEventListener('click', setH265);
+      defaultButton.addEventListener('click', setDefault);
+      var video = document.getElementById('video');
+      var flvPlayer = null;
+      function setH264() 
+      {
+        UrlInput.value = 'https://yuweifeng.top:9215/file/H264AAC.flv'; 
+      }
+      function setH265() 
+      {
+        UrlInput.value = 'https://yuweifeng.top:9215/file_enhanced/H265AAC.flv'; 
+      }
+      function setDefault() 
+      {
+        UrlInput.value = 'https://yuweifeng.top:9215/file/H264AAC.flv'; 
+      }
+      function setEnable() 
+      {
+        console.log('start Hls');
+        if (flvjs.isSupported()) {
+            flvPlayer = flvjs.createPlayer({
+                type: 'flv',					//媒体类型
+                url: UrlInput.value,					//flv格式媒体URL
+                isLive: true,					//数据源是否为直播流
+                hasAudio: true,				//数据源是否包含有音频
+                hasVideo: true,					//数据源是否包含有视频
+                enableStashBuffer: false		//是否启用缓存区
+              }, {
+                enableWorker: false, 			//不启用分离线程
+                enableStashBuffer: false, 		//关闭IO隐藏缓冲区
+                autoCleanupSourceBuffer: true 	//自动清除缓存
+              });
+            flvPlayer.attachMediaElement(video);	//将播放实例注册到节点
+            flvPlayer.load(); 					//加载数据流
+            flvPlayer.play();					//播放数据流
+        }
+      }
+      function setDisable() 
+      {
+         if (flvPlayer) 
+         {
+	        flvPlayer.pause();// 暂停播放数据流
+	        flvPlayer.unload();// 取消数据流加载
+	        flvPlayer.detachMediaElement();// 将播放实例从节点中取出
+	        flvPlayer.destroy(); // 销毁播放实例
+	        flvPlayer = null;
+         }
+      }
+    </script>
+  </body>
+</html>
