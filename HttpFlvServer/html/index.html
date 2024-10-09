@@ -50,18 +50,24 @@
       {
         console.log('start Hls');
         if (flvjs.isSupported()) {
-            flvPlayer = flvjs.createPlayer({
+            /*flvPlayer = flvjs.createPlayer({
                 type: 'flv',					//媒体类型
                 url: UrlInput.value,					//flv格式媒体URL
                 isLive: true,					//数据源是否为直播流
                 hasAudio: true,				//数据源是否包含有音频
                 hasVideo: true,					//数据源是否包含有视频
                 enableStashBuffer: false		//是否启用缓存区
+                bufferDuration: 10
               }, {
                 enableWorker: false, 			//不启用分离线程
                 enableStashBuffer: false, 		//关闭IO隐藏缓冲区
                 autoCleanupSourceBuffer: true 	//自动清除缓存
-              });
+              });*/
+            flvPlayer = flvjs.createPlayer({
+                type: 'flv',					//媒体类型
+                url: UrlInput.value,					//flv格式媒体URL
+                isLive: true
+            });
             flvPlayer.attachMediaElement(video);	//将播放实例注册到节点
             flvPlayer.load(); 					//加载数据流
             flvPlayer.play();					//播放数据流
