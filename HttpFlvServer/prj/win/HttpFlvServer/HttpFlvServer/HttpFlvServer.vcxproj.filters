@@ -15,7 +15,7 @@
     <Filter Include="demo\net">
       <UniqueIdentifier>{77885bb2-4b25-48d0-89f9-f70333f2afd3}</UniqueIdentifier>
     </Filter>
-    <Filter Include="demo\include">
+    <Filter Include="demo\net\include">
       <UniqueIdentifier>{cbf7e079-09fc-4cb6-ac3d-219629a74dbf}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
@@ -33,10 +33,10 @@
       <Filter>demo</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\demo\net\include\NetAdapter.h">
-      <Filter>demo\include</Filter>
+      <Filter>demo\net\include</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\demo\net\include\TcpSocket.h">
-      <Filter>demo\include</Filter>
+      <Filter>demo\net\include</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
