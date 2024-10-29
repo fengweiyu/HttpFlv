@@ -72,6 +72,7 @@ int HttpFlvServerDemo :: Proc()
         } 
         pHttpFlvServerIO = new HttpFlvServerIO(iClientSocketFd);
         AddMapServerIO(pHttpFlvServerIO,iClientSocketFd);
+        FLV_LOGD("m_HttpFlvServerIOMap size %d\r\n",m_HttpFlvServerIOMap.size());
     }
     return 0;
 }

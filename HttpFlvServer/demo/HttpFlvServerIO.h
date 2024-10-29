@@ -9,8 +9,8 @@
 * Last Modified         : 	
 * History               : 	
 ******************************************************************************/
-#ifndef HLS_SERVER_IO_H
-#define HLS_SERVER_IO_H
+#ifndef HTTP_FLV_SERVER_IO_H
+#define HTTP_FLV_SERVER_IO_H
 
 #include "TcpSocket.h"
 #include "HttpFlvServerInf.h"
