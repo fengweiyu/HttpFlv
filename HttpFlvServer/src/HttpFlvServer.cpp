@@ -347,7 +347,7 @@ int HttpFlvServer::GetFLV(char *o_strRes,int i_iResMaxLen)
     }
     if(NULL == m_pHttpFlvServerSession)
     {
-        FLV_LOGE("NULL == m_pHttpFlvServerSession %p \r\n",m_pHttpFlvServerSession);
+        //FLV_LOGE("NULL == m_pHttpFlvServerSession %p \r\n",m_pHttpFlvServerSession);
         return 0;
     }
     return m_pHttpFlvServerSession->GetFlv(o_strRes,i_iResMaxLen);
