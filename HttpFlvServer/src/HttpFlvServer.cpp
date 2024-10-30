@@ -242,22 +242,22 @@ int HttpFlvServer::HandleHttpReq(const char * i_strReq,char *o_strRes,int i_iRes
     if(0 == strcmp(tHttpReqPacket.strMethod,HTTP_METHOD_GET))
     {
         string astrRegex[HTTP_FLV_MAX_MATCH_NUM];
-        const char * strPattern = "/([A-Za-z_]+)/([A-Za-z0-9_]+).flv";//http://localhost:9214/file/H264AAC.flv
-        iRet=this->Regex(strPattern,tHttpReqPacket.strURL,astrRegex,HTTP_FLV_MAX_MATCH_NUM);//http://localhost:9214/file_enhanced/H265AAC.flv
-        if (iRet>2) //0是整行
+        const char * strPattern = "/([A-Za-z_]+)/([A-Za-z0-9_.]+)/([A-Za-z0-9_]+).flv";//http://localhost:9214/file/H264AAC.flv/test.flv
+        iRet=this->Regex(strPattern,tHttpReqPacket.strURL,astrRegex,HTTP_FLV_MAX_MATCH_NUM);//http://localhost:9214/file/H264AAC.flv/test_enhanced.flv
+        if (iRet>3) //0是整行 
         {
             int iEnhancedFlag=0;
             string strStreamType(astrRegex[1].c_str());//file
             string strFileName(astrRegex[2].c_str());
-            strFileName.append(".flv");
-            FLV_LOGW("%d,file m_pFileName %s\r\n",iRet,strFileName.c_str());
+            string strStreamArgs(astrRegex[3].c_str());
+            FLV_LOGW("%d,strStreamType %s,m_pFileName %s,strStreamArgs %s\r\n",iRet,strStreamType.c_str(),strFileName.c_str(),strStreamArgs.c_str());
             if(0 != strlen(tHttpReqPacket.strUserAgent)&&(NULL != strstr(tHttpReqPacket.strUserAgent,HTTP_FLV_CLIENT_VLC) 
             ||NULL != strstr(tHttpReqPacket.strUserAgent,HTTP_FLV_CLIENT_FFPLAY) ||NULL != strstr(tHttpReqPacket.strUserAgent,HTTP_FLV_CLIENT_CHROME)))
             {
                 FLV_LOGW("iEnhancedFlag tHttpReqPacket.strUserAgent %s\r\n",tHttpReqPacket.strUserAgent);
                 iEnhancedFlag=1;
             }
-            if(string::npos!= strStreamType.find("_enhanced"))
+            if(string::npos!= strStreamArgs.find("_enhanced"))
             {
                 FLV_LOGW("find EnhancedFlag tHttpReqPacket.strUserAgent %s\r\n",tHttpReqPacket.strUserAgent);
                 iEnhancedFlag=1;
