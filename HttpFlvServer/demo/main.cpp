@@ -60,7 +60,7 @@ static void PrintUsage(char *i_strProcName)
 {
     printf("Usage: %s ServerPort \r\n",i_strProcName);
     printf("run default args: %s 9214 \r\n",i_strProcName);
-    printf("client input url eg: http://localhost:9214/file/H264AAC.flv\r\n");
-    printf("client input url eg: http://localhost:9214/file_enhanced/H265AAC.flv\r\n");
+    printf("client input url eg: http://localhost:9214/file/H264AAC.flv/test.flv\r\n");
+    printf("client input url eg: http://localhost:9214/file/H265AAC.flv/test_enhanced.flv\r\n");
 }
 
