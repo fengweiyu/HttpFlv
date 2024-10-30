@@ -26,7 +26,7 @@
       const h265Button = document.getElementById('h265Button');
       const defaultButton = document.getElementById('defaultButton');
       const UrlInput = document.getElementById('UrlInput')
-      UrlInput.value = 'https://yuweifeng.top:9215/file/H264AAC.flv'; 
+      UrlInput.value = 'https://yuweifeng.top:9215/file/H264AAC.flv/test.flv'; 
       startButton.addEventListener('click', setEnable);
       stopButton.addEventListener('click', setDisable);
       h264Button.addEventListener('click', setH264);
@@ -36,15 +36,15 @@
       var flvPlayer = null;
       function setH264() 
       {
-        UrlInput.value = 'https://yuweifeng.top:9215/file/H264AAC.flv'; 
+        UrlInput.value = 'https://yuweifeng.top:9215/file/H264AAC.flv/test.flv'; 
       }
       function setH265() 
       {
-        UrlInput.value = 'https://yuweifeng.top:9215/file_enhanced/H265AAC.flv'; 
+        UrlInput.value = 'https://yuweifeng.top:9215/file/H265AAC.flv/test_enhanced.flv'; 
       }
       function setDefault() 
       {
-        UrlInput.value = 'https://yuweifeng.top:9215/file/H264AAC.flv'; 
+        UrlInput.value = 'https://yuweifeng.top:9215/file/H264AAC.flv/test.flv'; 
       }
       function setEnable() 
       {
