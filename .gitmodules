@@ -4,3 +4,6 @@
 [submodule "HttpFlvClient/src/ThirdSrc/media"]
 	path = HttpFlvClient/src/ThirdSrc/media
 	url = https://github.com/fengweiyu/media.git
+[submodule "HttpFlvClient/src/ThirdSrc/http"]
+	path = HttpFlvClient/src/ThirdSrc/http
+	url = https://github.com/fengweiyu/HTTP.git
