@@ -370,7 +370,7 @@ int HttpFlvClient::HandleHttpMedia(char * i_pcHttpMedia,int i_iMediaLen,T_FlvCli
     if(NULL != o_ptVideoStream && (m_tFrameInfo.eFrameType == MEDIA_FRAME_TYPE_VIDEO_I_FRAME ||
     m_tFrameInfo.eFrameType == MEDIA_FRAME_TYPE_VIDEO_P_FRAME || m_tFrameInfo.eFrameType == MEDIA_FRAME_TYPE_VIDEO_B_FRAME))
     {
-        o_ptVideoStream->pStreamData=m_tFrameInfo.pbFrameStartPos;
+        o_ptVideoStream->pStreamData=(char *)m_tFrameInfo.pbFrameStartPos;
         o_ptVideoStream->iStreamDataLen=m_tFrameInfo.iFrameLen;
         switch(m_tFrameInfo.eEncType)
         {
@@ -394,7 +394,7 @@ int HttpFlvClient::HandleHttpMedia(char * i_pcHttpMedia,int i_iMediaLen,T_FlvCli
     }
     if(NULL != o_ptAudioStream && m_tFrameInfo.eFrameType == MEDIA_FRAME_TYPE_AUDIO_FRAME)
     {
-        o_ptAudioStream->pStreamData=m_tFrameInfo.pbFrameStartPos;
+        o_ptAudioStream->pStreamData=(char *)m_tFrameInfo.pbFrameStartPos;
         o_ptAudioStream->iStreamDataLen=m_tFrameInfo.iFrameLen;
         switch(m_tFrameInfo.eEncType)
         {
@@ -428,7 +428,7 @@ int HttpFlvClient::HandleHttpMedia(char * i_pcHttpMedia,int i_iMediaLen,T_FlvCli
             HTTP_FLV_LOGE("FrameToContainer need more data %d\r\n",iRet);
             return iRet;
         }
-        o_ptMuxStream->pStreamData=m_pbMuxBuf;
+        o_ptMuxStream->pStreamData=(char *)m_pbMuxBuf;
         o_ptMuxStream->iStreamDataLen=iRet;
         snprintf(o_ptAudioStream->strStreamName,sizeof(o_ptAudioStream->strStreamName),"%s","flv");
     }

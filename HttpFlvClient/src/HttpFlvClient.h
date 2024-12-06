@@ -12,6 +12,7 @@
 #ifndef HTTP_FLV_CLIENT_H
 #define HTTP_FLV_CLIENT_H
 
+#include "HttpFlvClientCom.h"
 #include "HttpFlvClientSession.h"
 #include "HttpClient.h"
 
