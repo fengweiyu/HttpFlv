@@ -82,13 +82,14 @@ HttpFlvClientIO :: ~HttpFlvClientIO()
 * -----------------------------------------------
 * 2017/10/10	  V1.0.0		 Yu Weifeng 	  Created
 ******************************************************************************/
-int HttpFlvClientIO :: Proc(const char * i_strHttpURL,const char *i_strOutPath,int i_iOutSize)
+int HttpFlvClientIO :: Proc(const char * i_strHttpURL,int i_iOutSize)
 {
     int iRet=-1;
     char *pcRecvBuf=NULL;
     char *pcSendBuf=NULL;
     int iRecvLen=-1;
     timeval tTimeValue;
+    string strDomain("");
     string strIP("");
     int iPort=0;
     string strURL("");
@@ -111,7 +112,7 @@ int HttpFlvClientIO :: Proc(const char * i_strHttpURL,const char *i_strOutPath,i
 
 
 
-    if(NULL == i_strHttpURL || NULL == i_strOutPath)
+    if(NULL == i_strHttpURL)
     {
         HTTP_FLV_LOGE("NULL == i_strHttpURL || NULL == i_strOutPath || i_iOutSize <1 err\r\n");
         return -1;
@@ -151,10 +152,16 @@ int HttpFlvClientIO :: Proc(const char * i_strHttpURL,const char *i_strOutPath,i
         {
             case HTTP_FLV_CLIENT_INIT:
             {
-                iRet=m_pHttpFlvClient->ParseHttpURL(i_strHttpURL,&strIP,&iPort,&strURL);
+                iRet=m_pHttpFlvClient->ParseHttpURL(i_strHttpURL,&strDomain,&iPort,&strURL);
                 if(iRet < 0)
                 {
                     HTTP_FLV_LOGE("m_pHttpFlvClient->ParseHttpURL err exit %s\r\n",i_strHttpURL);
+                    break;
+                }
+                iRet=TcpClient::ResolveDomain(&strDomain,&strIP);
+                if(iRet < 0)
+                {
+                    HTTP_FLV_LOGE("TcpClient::ResolveDomain err exit %s,%s\r\n",strDomain.c_str(),strIP.c_str());
                     break;
                 }
                 iRet=CreateSaveDir(strURL.c_str()+1,&strFileDir);
@@ -258,35 +265,44 @@ int HttpFlvClientIO :: Proc(const char * i_strHttpURL,const char *i_strOutPath,i
             }
             case HTTP_FLV_CLIENT_HANDLE_FLV:
             {
+                snprintf(strFilePath,sizeof(strFilePath),"%s/%s.%s",strFileDir.c_str(),strFileName.substr(0,31).c_str(),"flv.flv");
+                this->SaveFile((const char *)strFilePath,pcFileBuf,iFileLen);
                 iProcessedLen=0;
                 while(iFileLen-iProcessedLen > 0)
                 {
                     memset(&tVideoStream,0,sizeof(T_FlvClientStream));
                     memset(&tAudioStream,0,sizeof(T_FlvClientStream));
                     memset(&tMuxStream,0,sizeof(T_FlvClientStream));
-                    iProcessedLen = m_pHttpFlvClient->HandleHttpMedia(pcFileBuf+iProcessedLen,iFileLen-iProcessedLen,&tVideoStream,&tAudioStream,&tMuxStream);
+                    iRet = m_pHttpFlvClient->HandleHttpMedia(pcFileBuf+iProcessedLen,iFileLen-iProcessedLen,&tVideoStream,&tAudioStream,&tMuxStream);
+                    if(iRet < 0)
+                    {
+                        HTTP_FLV_LOGE("HandleHttpMedia over exit %d,%d\r\n",iFileLen,iProcessedLen);
+                        break;
+                    }
+                    iProcessedLen += iRet;
                     if(strlen(tVideoStream.strStreamName) > 0 && tVideoStream.pStreamData != 0 && tVideoStream.iStreamDataLen > 0)
                     {
-                        snprintf(strFilePath,sizeof(strFilePath),"%s/%s.%s",strFileDir.c_str(),strFileName.c_str(),tVideoStream.strStreamName);
+                        snprintf(strFilePath,sizeof(strFilePath),"%s/%s.%s",strFileDir.c_str(),strFileName.substr(0,31).c_str(),tVideoStream.strStreamName);
                         this->SaveFile((const char *)strFilePath,tVideoStream.pStreamData,tVideoStream.iStreamDataLen);
                     } 
                     if(strlen(tAudioStream.strStreamName) > 0 && tAudioStream.pStreamData != 0 && tAudioStream.iStreamDataLen > 0)
                     {
-                        snprintf(strFilePath,sizeof(strFilePath),"%s/%s.%s",strFileDir.c_str(),strFileName.c_str(),tAudioStream.strStreamName);
+                        snprintf(strFilePath,sizeof(strFilePath),"%s/%s.%s",strFileDir.c_str(),strFileName.substr(0,31).c_str(),tAudioStream.strStreamName);
                         this->SaveFile((const char *)strFilePath,tAudioStream.pStreamData,tAudioStream.iStreamDataLen);
                     } 
                     if(strlen(tMuxStream.strStreamName) > 0 && tMuxStream.pStreamData != 0 && tMuxStream.iStreamDataLen > 0)
                     {
-                        snprintf(strFilePath,sizeof(strFilePath),"%s/%s.%s",strFileDir.c_str(),strFileName.c_str(),tMuxStream.strStreamName);
+                        snprintf(strFilePath,sizeof(strFilePath),"%s/%s.%s",strFileDir.c_str(),strFileName.substr(0,31).c_str(),tMuxStream.strStreamName);
                         this->SaveFile((const char *)strFilePath,tMuxStream.pStreamData,tMuxStream.iStreamDataLen);
                     } 
                 }
-
+                
                 if(i_iOutSize<=0)
                 {//表示取完流
+                    memmove(pcRecvBuf,pcFileBuf+iProcessedLen,iFileLen-iProcessedLen);
+                    iFileLen = iFileLen-iProcessedLen;
                     iRecvLen = 0;
-                    memset(pcRecvBuf,0,iOutSize);
-                    iRet=TcpClient::Recv(pcRecvBuf,&iRecvLen,iOutSize,m_iClientSocketFd,&timeMediaMS);
+                    iRet=TcpClient::Recv(pcRecvBuf+iFileLen,&iRecvLen,iOutSize-iFileLen,m_iClientSocketFd,&timeMediaMS);
                     if(iRet < 0)
                     {
                         HTTP_FLV_LOGE("TcpClient::Recv err exit %d\r\n",eHttpFlvClientState);
@@ -296,10 +312,11 @@ int HttpFlvClientIO :: Proc(const char * i_strHttpURL,const char *i_strOutPath,i
                         HTTP_FLV_LOGE("TcpClient::Recv iRecvLen err %d\r\n",iTryTime);
                     }
                     pcFileBuf=pcRecvBuf;
-                    iFileLen=iRecvLen;
+                    iFileLen+=iRecvLen;
                 }
                 else
                 {
+                    iFileLen=0;
                     eHttpFlvClientState=HTTP_FLV_CLIENT_EXIT;
                 }
                 break;
@@ -364,7 +381,9 @@ int HttpFlvClientIO :: CreateSaveDir(const char * i_strRoot,string *o_strSaveDir
     char *sep = strchr(strLocation, '/');
     if (sep != NULL) 
     {  
-        *sep = '\0';  
+        *sep = '\0'; 
+        RemoveDir((const char *)strLocation);
+        SleepMs(300);
         if (MakeDir(strLocation) == -1) 
         {  
             if (errno == EEXIST) 
@@ -491,5 +510,183 @@ int HttpFlvClientIO :: SaveFile(const char * strFileName,char *i_pData,int i_iLe
 int HttpFlvClientIO :: GetProcFlag()
 {
     return m_iHttpFlvClientIOFlag;//多线程竞争注意优化
+}
+
+/*****************************************************************************
+-Fuction        : RemoveDir
+-Description    : 
+-Input          : 
+-Output         : 
+-Return         : len
+* Modify Date     Version        Author           Modification
+* -----------------------------------------------
+* 2023/09/21      V1.0.0         Yu Weifeng       Created
+******************************************************************************/
+int HttpFlvClientIO::RemoveDir(const char *i_strPath) 
+{
+    int iRet = -1;
+    iRet = ExecuteProgram("rm",i_strPath,"-rf");//只有用户点击删除配置才删配置目录
+    return iRet;
+}
+
+/*****************************************************************************
+-Fuction        : ExecuteProgram
+-Description    : 
+-Input          : 
+-Output         : 
+-Return         : len
+* Modify Date     Version        Author           Modification
+* -----------------------------------------------
+* 2023/09/21      V1.0.0         Yu Weifeng       Created
+******************************************************************************/
+int HttpFlvClientIO::ExecuteProgram(const char* szExeAPPPath, const char*szExeParam1,const char*szExeParam2)
+{
+#ifndef _WIN32
+	pid_t pid = fork(); // 创建子进程
+	if (pid < 0)
+	{
+		HTTP_FLV_LOGE("fork err\r\n");
+		return -1; // 返回-1表示失败
+	}
+
+	if (pid == 0)// 子进程
+	{//fork() 成功，返回值在父进程中是子进程的 PID，在子进程中是0
+        
+        prctl(PR_SET_PDEATHSIG,SIGKILL);/*父进程退出时，会收到SIGKILL信号*/
+
+		char* const argv[] = { (char *)szExeAPPPath, (char*)szExeParam1, (char*)szExeParam2, NULL};
+		// 使用execlp执行程序，注意：成功后不会返回
+		if (execvp(argv[0], argv) == -1)
+		{
+			HTTP_FLV_LOGE("execvp err\r\n");
+			exit(EXIT_FAILURE); // execvp失败时退出子进程
+		}
+        // execvp 只有在失败时返回  
+        HTTP_FLV_LOGW("execvp exit");  
+        exit(1); 
+	}
+	// 父进程  
+	return pid; // 父进程中返回子进程PID
+#else
+    char strParam[128];
+    snprintf(strParam,sizeof(strParam),"%s %s",szExeParam1,szExeParam2);
+    // 要执行的程序路径  
+    LPCSTR applicationName = szExeAPPPath;  
+
+    // 传递给新进程的参数  
+    LPCSTR commandLineArguments = strParam;//"arg1 arg2 arg3";  // 可以传递多个参数  
+
+    // 创建进程所需的结构体  
+    STARTUPINFOA startupInfo;  
+    PROCESS_INFORMATION processInfo;  
+
+    // 初始化结构体  
+    ZeroMemory(&startupInfo, sizeof(startupInfo));  
+    startupInfo.cb = sizeof(startupInfo);  
+    ZeroMemory(&processInfo, sizeof(processInfo));  
+
+    // 创建进程  
+    BOOL success = CreateProcessA(  
+        applicationName,           // 应用程序名称  
+        (LPSTR)commandLineArguments, // 命令行参数  
+        NULL,                      // 进程句柄不可继承   
+        NULL,                      // 线程句柄不可继承   
+        FALSE,                    // 不继承句柄   
+        0,                         // 无特殊标志  
+        NULL,                      // 使用当前环境  
+        NULL,                      // 使用当前目录  
+        &startupInfo,             // 指向 STARTUPINFO 的指针  
+        &processInfo               // 指向 PROCESS_INFORMATION 的指针  
+    );  
+    if (success) 
+    {  
+        HTTP_FLV_LOGE("CreateProcessA success\r\n");
+        // 等待进程完成  
+        WaitForSingleObject(processInfo.hProcess, INFINITE);  
+        return reinterpret_cast<ULONG_PTR>(processInfo.hProcess); 
+    } 
+    HTTP_FLV_LOGE("CreateProcessA err\r\n");
+    return -1;
+#endif
+}
+
+
+/*****************************************************************************
+-Fuction        : ExecuteProgram
+-Description    : 
+-Input          : 
+-Output         : 
+-Return         : len
+* Modify Date     Version        Author           Modification
+* -----------------------------------------------
+* 2023/09/21      V1.0.0         Yu Weifeng       Created
+******************************************************************************/
+int HttpFlvClientIO::ExecuteProgram(const char* szExeAPPPath, const char*szExeParam, int nWindowType)
+{
+#ifndef _WIN32
+	pid_t pid = fork(); // 创建子进程
+	if (pid < 0)
+	{
+		HTTP_FLV_LOGE("fork err\r\n");
+		return -1; // 返回-1表示失败
+	}
+
+	if (pid == 0)// 子进程
+	{//fork() 成功，返回值在父进程中是子进程的 PID，在子进程中是0
+	
+        prctl(PR_SET_PDEATHSIG,SIGKILL);/*父进程退出时，会收到SIGKILL信号*/
+
+		char* const argv[] = { (char *)szExeAPPPath, (char*)szExeParam, NULL };
+		// 使用execlp执行程序，注意：成功后不会返回
+		if (execvp(argv[0], argv) == -1)
+		{
+			HTTP_FLV_LOGE("execvp err\r\n");
+			exit(EXIT_FAILURE); // execvp失败时退出子进程
+		}
+        // execvp 只有在失败时返回  
+        HTTP_FLV_LOGW("execvp exit");  
+        exit(1); 
+	}
+	// 父进程  
+	return pid; // 父进程中返回子进程PID
+#else
+    // 要执行的程序路径  
+    LPCSTR applicationName = szExeAPPPath;  
+
+    // 传递给新进程的参数  
+    LPCSTR commandLineArguments = szExeParam;//"arg1 arg2 arg3";  // 可以传递多个参数  
+
+    // 创建进程所需的结构体  
+    STARTUPINFOA startupInfo;  
+    PROCESS_INFORMATION processInfo;  
+
+    // 初始化结构体  
+    ZeroMemory(&startupInfo, sizeof(startupInfo));  
+    startupInfo.cb = sizeof(startupInfo);  
+    ZeroMemory(&processInfo, sizeof(processInfo));  
+
+    // 创建进程  
+    BOOL success = CreateProcessA(  
+        applicationName,           // 应用程序名称  
+        (LPSTR)commandLineArguments, // 命令行参数  
+        NULL,                      // 进程句柄不可继承   
+        NULL,                      // 线程句柄不可继承   
+        FALSE,                    // 不继承句柄   
+        0,                         // 无特殊标志  
+        NULL,                      // 使用当前环境  
+        NULL,                      // 使用当前目录  
+        &startupInfo,             // 指向 STARTUPINFO 的指针  
+        &processInfo               // 指向 PROCESS_INFORMATION 的指针  
+    );  
+    if (success) 
+    {  
+        HTTP_FLV_LOGE("CreateProcessA success\r\n");
+        // 等待进程完成  
+        WaitForSingleObject(processInfo.hProcess, INFINITE);  
+        return reinterpret_cast<ULONG_PTR>(processInfo.hProcess); 
+    } 
+    HTTP_FLV_LOGE("CreateProcessA err\r\n");
+    return -1;
+#endif
 }
 

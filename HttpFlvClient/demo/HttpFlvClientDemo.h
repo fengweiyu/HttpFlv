@@ -35,7 +35,7 @@ class HttpFlvClientDemo
 public:
 	HttpFlvClientDemo();
 	virtual ~HttpFlvClientDemo();
-    int Proc(const char * i_strHttpURL,const char *i_strFlag=NULL);
+    int Proc(const char * i_strHttpURL,int i_iOutSize=-1);
     
 private:
     HttpFlvClientIO m_HttpFlvClientIO;

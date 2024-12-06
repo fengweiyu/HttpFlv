@@ -56,9 +56,9 @@ HttpFlvClientDemo :: ~HttpFlvClientDemo()
 * -----------------------------------------------
 * 2023/10/10	  V1.0.0		 Yu Weifeng 	  Created
 ******************************************************************************/
-int HttpFlvClientDemo :: Proc(const char * i_strHttpURL,const char *i_strFlag)
+int HttpFlvClientDemo :: Proc(const char * i_strHttpURL,int i_iOutSize)
 {
-    return m_HttpFlvClientIO.Proc(i_strHttpURL,i_strFlag);
+    return m_HttpFlvClientIO.Proc(i_strHttpURL,i_iOutSize);
 }
 
 

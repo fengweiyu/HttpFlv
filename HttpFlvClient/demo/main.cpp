@@ -43,7 +43,7 @@ int main(int argc, char* argv[])
         delete pHttpFlvClientDemo;
         return iRet;
     }
-    iRet=pHttpFlvClientDemo->Proc(argv[1],argv[2]);//×èÈû
+    iRet=pHttpFlvClientDemo->Proc(argv[1],atoi(argv[2]));//×èÈû
     delete pHttpFlvClientDemo;
     return iRet;
 }

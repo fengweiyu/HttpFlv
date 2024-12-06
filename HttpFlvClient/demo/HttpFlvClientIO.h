@@ -33,12 +33,15 @@ class HttpFlvClientIO : public TcpClient
 public:
 	HttpFlvClientIO();
 	virtual ~HttpFlvClientIO();
-    int Proc(const char * i_strHttpURL,const char *i_strOutPath=NULL,int i_iOutSize=-1);
+    int Proc(const char * i_strHttpURL,int i_iOutSize=-1);
     int GetProcFlag();
 private:
     int SaveFile(const char * strFileName,char *i_pData,int i_iLen);
     int CreateSaveDir(const char * i_strLocation,string *o_strSaveDir);
     int GetFileName(string * i_strRoot,string *o_strFileName);
+    int RemoveDir(const char *i_strServerID);
+    int ExecuteProgram(const char* szExeAPPPath, const char*szExeParam1, const char*szExeParam2);
+    int ExecuteProgram(const char* szExeAPPPath, const char*szExeParam, int nWindowType);
 
     HttpFlvClientInf * m_pHttpFlvClient;
 	int m_iClientSocketFd;
