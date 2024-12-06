@@ -430,7 +430,7 @@ int HttpFlvClient::HandleHttpMedia(char * i_pcHttpMedia,int i_iMediaLen,T_FlvCli
         }
         o_ptMuxStream->pStreamData=(char *)m_pbMuxBuf;
         o_ptMuxStream->iStreamDataLen=iRet;
-        snprintf(o_ptAudioStream->strStreamName,sizeof(o_ptAudioStream->strStreamName),"%s","flv");
+        snprintf(o_ptMuxStream->strStreamName,sizeof(o_ptMuxStream->strStreamName),"%s","flv");
     }
     return m_tFrameInfo.iFrameProcessedLen;
 }

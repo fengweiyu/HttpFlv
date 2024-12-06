@@ -22,6 +22,7 @@
 #else
 #include <unistd.h>
 #include <sys/stat.h> 
+#include <sys/prctl.h>
 #define SleepMs(val) usleep(val*1000)
 #define MakeDir(val) mkdir(val, 0777)
 #define DeleteDir(val) rmdir(val)
