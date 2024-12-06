@@ -34,12 +34,19 @@ target_include_directories(HttpFlvClientDemo PUBLIC
     ${PROJECT_SOURCE_DIR}/../src/include
 )
 
-target_link_libraries(HttpFlvClientDemo PUBLIC
-    ${CMAKE_BINARY_DIR}/demo/net/libnet.a
-    ${CMAKE_BINARY_DIR}/src/libHttpFlvClient.a
-    ${CMAKE_BINARY_DIR}/src/ThirdSrc/http/libhttp.a
-    ${CMAKE_BINARY_DIR}/src/ThirdSrc/media/libmedia.a
+target_link_libraries(HttpFlvClientDemo PUBLIC net HttpFlvClient http media
+#    ${CMAKE_BINARY_DIR}/demo/net/libnet.a
+#    ${CMAKE_BINARY_DIR}/src/libHttpFlvClient.a
+#    ${CMAKE_BINARY_DIR}/src/ThirdSrc/http/libhttp.a
+#    ${CMAKE_BINARY_DIR}/src/ThirdSrc/media/libmedia.a
 ) 
+
+
+if(WIN32)  
+    # Windows平台上链接WinSock库  
+    target_link_libraries(HttpFlvClientDemo PUBLIC ws2_32)
+endif()
+
 
 #target_link_libraries(HttpFlvClientDemo PRIVATE Threads::Threads)  
 #TARGET_LINK_LIBRARIES(webrtcServer -pthread -lm -lrt -ldl -lresolv -static)
