@@ -53,7 +53,7 @@ endif()
 
 # 安装库文件  
 install(TARGETS HttpFlvClientDemo  
-        DESTINATION .)  # 库文件的安装目录  
+        DESTINATION HttpFlvClientDemo) #安装目录 目录HttpFlvClientDemo换成目录. 也可以，这样就在当前目录生成不会生成在HttpFlvClientDemo目录下
 
 
 
