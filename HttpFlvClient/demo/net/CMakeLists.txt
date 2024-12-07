@@ -3,9 +3,7 @@ cmake_minimum_required(VERSION 3.10)
 
 project (net)
  
-set(CMAKE_INSTALL_PREFIX
-    ${CMAKE_INSTALL_PREFIX}/net
-)
+#set(CMAKE_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX}/net) #CMAKE_INSTALL_PREFIX 外面设置，内部设置无效
 
 # 设置C++标准为C++11
 set(CMAKE_CXX_STANDARD 11)
@@ -46,12 +44,12 @@ target_include_directories(net PUBLIC
 
 # 安装库文件  
 install(TARGETS net  
-        DESTINATION lib)  # 库文件的安装目录  
+        DESTINATION net/lib)  # 库文件的安装目录  
 
 # 安装头文件  
 file(GLOB PUBLIC_HEADERS "${PROJECT_SOURCE_DIR}/include/*.h")
 install(FILES ${PUBLIC_HEADERS}  
-        DESTINATION include)  # 头文件的安装目录
+        DESTINATION net/include)  # 头文件的安装目录
 
 
 
