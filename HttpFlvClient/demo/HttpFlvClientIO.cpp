@@ -23,7 +23,7 @@
 using std::thread;
 
 #define HTTP_FLV_IO_SEND_MAX_LEN (10240)
-#define HTTP_FLV_IO_RECV_MAX_LEN (1*1024*1024)
+#define HTTP_FLV_IO_RECV_MAX_LEN (200*1024) //(1*1024*1024)
 
 typedef enum HttpFlvClientState
 {
@@ -605,7 +605,7 @@ int HttpFlvClientIO::ExecuteProgram(const char* szExeAPPPath, const char*szExePa
         WaitForSingleObject(processInfo.hProcess, INFINITE);  
         return reinterpret_cast<ULONG_PTR>(processInfo.hProcess); 
     } 
-    HTTP_FLV_LOGE("CreateProcessA err\r\n");
+    HTTP_FLV_LOGE("CreateProcessA fail,warn\r\n");
     return -1;
 #endif
 }
@@ -685,7 +685,7 @@ int HttpFlvClientIO::ExecuteProgram(const char* szExeAPPPath, const char*szExePa
         WaitForSingleObject(processInfo.hProcess, INFINITE);  
         return reinterpret_cast<ULONG_PTR>(processInfo.hProcess); 
     } 
-    HTTP_FLV_LOGE("CreateProcessA err\r\n");
+    HTTP_FLV_LOGE("CreateProcessA fail,warn\r\n");
     return -1;
 #endif
 }
