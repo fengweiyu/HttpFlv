@@ -1,5 +1,9 @@
 cmake_minimum_required(VERSION 3.10) 
 
+SET(CMAKE_TOOLCHAIN_FILE "build/ToolChain.cmake")
+#SET(CMAKE_SYSTEM_NAME "Linux")
+#SET(CMAKE_C_COMPILER "gcc")
+#SET(CMAKE_CXX_COMPILER "g++")
 
 project (net)
  
@@ -39,7 +43,9 @@ target_include_directories(net PUBLIC
 )
 
 
-
+# 设置库输出目录  
+#SET(LIBRARY_OUTPUT_PATH CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/build/lib)
+set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/build/lib)
 
 
 # 安装库文件  
