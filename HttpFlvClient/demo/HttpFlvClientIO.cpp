@@ -260,6 +260,11 @@ int HttpFlvClientIO :: Proc(const char * i_strHttpURL,int i_iOutSize)
                 iOffset=0;
                 iTryTime=0;
                 iRet = m_pHttpFlvClient->ParseHttpMedia(pcRecvBuf,iRecvLen,&pcFileBuf,&iFileLen);
+                if(iRet < 0)
+                {
+                    HTTP_FLV_LOGE("m_pHttpFlvClient->ParseHttpMedia err exit %s,%s\r\n",strIP.c_str(),pcRecvBuf);
+                    break;
+                }
                 eHttpFlvClientState=HTTP_FLV_CLIENT_HANDLE_FLV;
                 break;
             }
