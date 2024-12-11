@@ -323,7 +323,7 @@ int HttpFlvClient::ParseHttpMedia(char * i_pcHttpMedia,int i_iMediaLen,char **o_
     }
     if(tHttpResPacket.iStatusCode!=200)
     {
-        HTTP_FLV_LOGE("HandleHttpMedia err, iStatusCode%d !=200\r\n",tHttpResPacket.iStatusCode);
+        HTTP_FLV_LOGE("HandleHttpMedia err, iStatusCode%d !=200,, strStatusMsg %s\r\n",tHttpResPacket.iStatusCode,tHttpResPacket.strStatusMsg);
         return iRet;
     }
     if(tHttpResPacket.iContentLength!=tHttpResPacket.iBodyCurLen)
