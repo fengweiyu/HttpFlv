@@ -417,7 +417,7 @@ int HttpFlvClient::HandleHttpMedia(char * i_pcHttpMedia,int i_iMediaLen,T_FlvCli
     }
     if(NULL != o_ptMuxStream)
     {
-        iRet = m_HttpFlvClientSession.FrameToContainer(&m_tFrameInfo,STREAM_TYPE_FLV_STREAM,m_pbMuxBuf,HTTP_FLV_BUF_MAX_LEN);
+        iRet = m_HttpFlvClientSession.FrameToContainer(&m_tFrameInfo,STREAM_TYPE_ENHANCED_FLV_STREAM,m_pbMuxBuf,HTTP_FLV_BUF_MAX_LEN);
         if(iRet < 0)
         {
             HTTP_FLV_LOGE("FrameToContainer err iWriteLen %d\r\n",iRet);
