@@ -19,7 +19,7 @@
       <video id="videoElement" playsinline controls autoplay muted style="width: 80%;height: auto;"></video>
       </br>
       <input style="width:30px" type="text" name="seekpoint" />
-      <button οnclick="flv_seekto()">跳转</button>
+      <button οnclick="flv_seekto()">seek</button>
     </center>
 
     <script>
@@ -29,7 +29,9 @@
       const h265Button = document.getElementById('h265Button');
       const defaultButton = document.getElementById('defaultButton');
       const UrlInput = document.getElementById('UrlInput')
-      UrlInput.value = 'https://yuweifeng.top:9215/file/H265AAC.flv/test_enhanced.flv'; 
+      const h264URL = 'https://yuweifeng.top:9215/file/H264AAC.flv/test.flv';  
+      const h265URL = 'https://yuweifeng.top:9215/file/H265AAC.flv/test_enhanced.flv'; 
+      UrlInput.value = h265URL
       startButton.addEventListener('click', setEnable);
       stopButton.addEventListener('click', setDisable);
       h264Button.addEventListener('click', setH264);
@@ -39,15 +41,15 @@
       var flvPlayer = null;
       function setH264() 
       {
-        UrlInput.value = 'https://yuweifeng.top:9215/file/H264AAC.flv/test.flv'; 
+        UrlInput.value = h264URL
       }
       function setH265() 
       {
-        UrlInput.value = 'https://yuweifeng.top:9215/file/H265AAC.flv/test_enhanced.flv'; 
+        UrlInput.value = h265URL; 
       }
       function setDefault() 
       {
-        UrlInput.value = 'https://yuweifeng.top:9215/file/H264AAC.flv/test.flv'; 
+        UrlInput.value = h264URL; 
       }
       function setEnable() 
       {
@@ -105,7 +107,7 @@
             } 
             else 
             {
-                console.log("lastDecodedFrame:"+this.lastDecodedFrame+"decodedFrames:"+res.decodedFrames);
+                console.log("no frame decoded,lastDecodedFrame:"+this.lastDecodedFrame+"decodedFrames:"+res.decodedFrames);
                 this.lastDecodedFrame = 0;
                 if (this.player) 
                 {
@@ -150,11 +152,11 @@
                 let end = flvPlayer.buffered.end(0);//获取当前buffered值 videoElement
                 let diff = end - flvPlayer.currentTime;//获取buffered与currentTime的差值 videoElement
                 if (diff >= 1.0) 
-                {//如果差值大于等于1.0 手动跳帧 这里可根据自身需求来定 //
+                {//如果差值大于等于1.0 手动跳帧 这里可根据自身需求来定 //当前这么设置已经挺稳定，如果出现卡顿转圈，大概率是服务过来的流不及时
                     console.log("diff:"+diff+"currentTime:"+videoElement.currentTime+"end:"+videoElement.buffered.end(0));
                     if(diff >= 10)
                     {
-                        videoElement.currentTime = videoElement.buffered.end(0)-0.2;//手动跳帧,卡顿 (比自己当前时间前0.2s)
+                        videoElement.currentTime = videoElement.buffered.end(0)-2;//手动跳帧,卡顿 (比自己当前时间前0.2s)
                         lastDecFrameNum-=1;//重新回到页面，由于暂停恢复到启动，会触发定时器10s但是实际并不是流断了，所以此时不重连
                     }
                     else
@@ -167,7 +169,7 @@
             }
             //CheckFrame();
         }
-        var frameCheck = self.setInterval("CheckFrame()", 10000);
+        var frameCheck = self.setInterval("CheckFrame()", 21000);
         function CheckFrame() 
         {
             if (decFrameNum > lastDecFrameNum)
@@ -183,6 +185,35 @@
                 decFrameNum=0;
             }
         }
+        function formatDate(date) 
+        {  
+            const currentDate = new Date();  
+            const year = currentDate.getFullYear();  
+            const month = String(currentDate.getMonth() + 1).padStart(2, '0'); // 月份从0开始  
+            const day = String(currentDate.getDate()).padStart(2, '0');  
+            const hours = String(currentDate.getHours()).padStart(2, '0');  
+            const minutes = String(currentDate.getMinutes()).padStart(2, '0');  
+            const seconds = String(currentDate.getSeconds()).padStart(2, '0');  
+
+            const formattedDate = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`; 
+            return formattedDate;  
+        } 
+        function log(message, ...optionalParams) 
+        {
+            const now = new Date();  
+            const timeStamp = formatDate(now);  //now.toISOString(); // 或者使用自定义格式  
+            //console.log([`[${timeStamp}]`,message, ...optionalParams);
+        }
+        //自执行函数：我们使用一个自执行函数来封装代码，确保不会污染全局命名空间
+        (function() {  
+            const originalLog = console.log;  
+
+            console.log = function(...args) {  
+                const now = new Date();  
+                const timeStamp = formatDate(now);  //now.toISOString(); // 或者使用自定义格式  
+                originalLog.apply(console, [`[${timeStamp}]`, ...args]);  
+            };  
+        })(); 
     </script>
   </body>
 </html>
