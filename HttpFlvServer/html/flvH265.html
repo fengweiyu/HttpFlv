@@ -97,21 +97,33 @@
          }
       }
         var decFrameNum=0;
+        var cacheTime=1;
+        var decodeCnt=0;
         function playInfo(res) 
         {//当前播放信息，获取当前的网速
+            //console.log("no frame decoded,DecodedFrame:"+this.lastDecodedFrame+" cacheTime:"+cacheTime);
             decFrameNum=res.decodedFrames;
             if (this.lastDecodedFrame == 0) 
             {//this.lastDecodedFrame 是回调对象内定义的，如果回调对象内没有定义，则被自动定义
                 this.lastDecodedFrame = res.decodedFrames;
+                decodeCnt=0;
                 return;
             }
             if (this.lastDecodedFrame != res.decodedFrames) 
             {
                 this.lastDecodedFrame = res.decodedFrames;
+                decodeCnt+=1;
+                if(decodeCnt>100&&cacheTime>0)
+                {//间隔60s则认为网络恢复，缓存减少
+                    decodeCnt=0;//函数进入一次600ms
+                    cacheTime-=1;
+                    console.log("DecodedFrame:"+this.lastDecodedFrame+" cacheTime:"+cacheTime);
+                }
             } 
             else 
             {
-                console.log("no frame decoded,lastDecodedFrame:"+this.lastDecodedFrame+"decodedFrames:"+res.decodedFrames);
+                console.log("no frame decoded,DecodedFrame:"+this.lastDecodedFrame+" cacheTime:"+cacheTime);
+                cacheTime+=1;
                 this.lastDecodedFrame = 0;
                 if (this.player) 
                 {
@@ -148,17 +160,17 @@
         }
 
         var lastDecFrameNum=0;
-        var int1 = self.setInterval("clock()", 5000);
+        var int1 = self.setInterval("clock()", 1000);
         function clock() 
         {
             if (videoElement.buffered.length > 0) 
             {
                 let end = flvPlayer.buffered.end(0);//获取当前buffered值 videoElement
                 let diff = end - flvPlayer.currentTime;//获取buffered与currentTime的差值 videoElement
-                if (diff >= 2.6) //1.0 调高就不容易出现卡顿，但是延迟就高了，比如数据间隔2s才过来，但2s里的数据时间戳又是均匀的，如果这里1s就会快放然后卡住又快放，这时这里就填2.6s左右合适
+                if (diff >= cacheTime) //1.0 调高就不容易出现卡顿，但是延迟就高了，比如数据间隔2s才过来，但2s里的数据时间戳又是均匀的，如果这里1s就会快放然后卡住又快放，这时这里就填2.6s左右合适
                 {//如果差值大于等于1.0 手动跳帧 这里可根据自身需求来定 //当前这么设置已经挺稳定，如果出现卡顿转圈，大概率是服务过来的流不及时
-                    console.log("diff:"+diff+"currentTime:"+videoElement.currentTime+"end:"+videoElement.buffered.end(0));
-                    if(diff >= 10)
+                    console.log("diff:"+diff+" cacheTime:"+cacheTime+" currentTime:"+videoElement.currentTime+" end:"+videoElement.buffered.end(0));
+                    if(diff >= (10*cacheTime))
                     {
                         videoElement.currentTime = videoElement.buffered.end(0)-2;//手动跳帧,卡顿 (比自己当前时间前0.2s)
                         lastDecFrameNum-=1;//重新回到页面，由于暂停恢复到启动，会触发定时器10s但是实际并不是流断了，所以此时不重连
@@ -205,8 +217,9 @@
             const hours = String(currentDate.getHours()).padStart(2, '0');  
             const minutes = String(currentDate.getMinutes()).padStart(2, '0');  
             const seconds = String(currentDate.getSeconds()).padStart(2, '0');  
+            const milliseconds = String(currentDate.getMilliseconds()).padStart(3, '0');
 
-            const formattedDate = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`; 
+            const formattedDate = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}.${milliseconds}`; 
             return formattedDate;  
         } 
         function log(message, ...optionalParams) 
