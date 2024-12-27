@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+    <title>flv.js demo</title>
+    <style>
+        .mainContainer {
+    display: block;
+    width: 1024px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.urlInput {
+    display: block;
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 8px;
+    margin-bottom: 8px;
+}
+
+.centeredVideo {
+    display: block;
+    width: 100%;
+    height: 576px;
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: auto;
+}
+
+.controls {
+    display: block;
+    width: 100%;
+    text-align: left;
+    margin-left: auto;
+    margin-right: auto;
+}
+    </style>
+</head>
+
+<body>
+    <div class="mainContainer">
+        <video id="videoElement" class="centeredVideo" controls muted autoplay width="1024" height="576">Your browser is too old which doesn't support HTML5 video.</video>
+    </div>
+    <br>
+    <div class="controls">
+        <button οnclick="flv_load()">加载</button>
+        <button οnclick="flv_start()">开始</button>
+        <button οnclick="flv_pause()">暂停</button>
+        <button οnclick="flv_destroy()">停止</button>
+        <input style="width:100px" type="text" name="seekpoint" />
+        <button οnclick="flv_seekto()">跳转</button>
+    </div>
+    <script src="./flv-h265.min.js"></script>
+    <!--script src="./jquery-3.4.1.min.js"></script-->
+    <script>
+        var player = document.getElementById('videoElement');
+        
+        player.on("error", (errorType, errorDetail, errorInfo) => {
+        console.log("errorType:", errorType);
+        console.log("errorDetail:", errorDetail);
+        console.log("errorInfo:", errorInfo);
+        //视频出错后销毁重新创建 'error' flvjs.Events.ERROR "statistics_info" flvjs.Events.STATISTICS_INFO
+         if (this.player) {
+          this.player.pause();
+          this.player.unload();
+          this.player.detachMediaElement();
+          this.player.destroy();
+          this.player= null;
+          this.createPlayer(videoElement, this.url);
+        }
+      });
+        
+       player.on("statistics_info", function (res) {
+       if (this.lastDecodedFrame == 0) {
+         this.lastDecodedFrame = res.decodedFrames;
+         return;
+       }
+       if (this.lastDecodedFrame != res.decodedFrames) {
+         this.lastDecodedFrame = res.decodedFrames;
+       } else {
+           this.lastDecodedFrame = 0;
+           if (this.player) {
+             this.player.pause();
+             this.player.unload();
+             this.player.detachMediaElement();
+             this.player.destroy();
+             this.player= null;
+             this.createPlayer(videoElement, this.url);
+         }
+       }
+     });
+        
+        function flv_load() {
+            //player.load();
+            start();
+        }
+        
+        function flv_start() {
+            player.play();
+        }
+
+        function flv_pause() {
+            player.pause();
+        }
+
+        function flv_destroy() {
+            player.pause();
+            player.unload();
+            player.detachMediaElement();
+            player.destroy();
+            player = null;
+        }
+
+        function flv_seekto() {
+            player.currentTime = parseFloat(document.getElementsByName('seekpoint')[0].value);
+        }
+        
+        function start() {
+            if (flvjs.isSupported()) {
+                var flvPlayer = flvjs.createPlayer({
+                    enableWorker:false,
+                    lazyLoadMaxDuration:3*60,
+                    enableStashBuffer:false,
+                    fixAudioTimeStampGap:false,
+                    autoCleanupSourceBuffer:true,
+                    isLive:true,
+                    type: 'flv',
+                    url: 'https://yuweifeng.top:9215/file/H264AAC.flv/test.flv'
+                });
+                flvPlayer.attachMediaElement(videoElement);
+                flvPlayer.load(); //加载
+                player.play(); //add
+            }
+        }
+        
+        document.addEventListener('DOMContentLoaded', function () {
+            start();
+          });
+
+        var int1 = self.setInterval("clock()", 5000);
+        function clock() {
+          if (this.player.buffered.length) {
+            let end = this.player.buffered.end(0);//获取当前buffered值
+            let diff = end - this.player.currentTime;//获取buffered与currentTime的差值
+            if (diff >= 1.0) {//如果差值大于等于1.0 手动跳帧 这里可根据自身需求来定
+              //this.player.currentTime = this.player.buffered.end(0)-0.2;//手动跳帧,卡顿 (比自己当前时间前0.2s)
+              this.player.playbackRate +=0.1;//采用加速方式追帧
+            }
+            else
+               this.player.playbackRate =1.0;
+           
+          }
+       }
+
+    </script>
+</body>
+
+</html>
