@@ -15,31 +15,48 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+import playerImp from './playerImp.js';
+
+
 class player 
 {
-    constructor(url) 
+    constructor(type,url,needSoftDecode,needDownload,needMark,markText) 
     {
-        this.m_Convert = new convert();
+        this.m_PlayerImp = new playerImp();
         this.m_URL = url;
+        this.m_SrcName = type;
         this.m_SrcType = ".pri";
         this.m_DstType = ".mp4";
+        if(needSoftDecode)
+            this.m_DstType = ".OriginalData";
+        this.m_NeedDownload = needDownload;
+        this.m_NeedMark = needMark;
+        this.m_MarkText = markText;
     }
-
+    getInitedFlag() 
+    {//wasm初始化之后才可以进行转换播放操作
+		return this.m_PlayerImp.getInitedFlag();
+    }
     /**
      * 绑定媒体元素
      * @param {HTMLMediaElement} mediaElement - 用于播放的媒体元素（如 <video>）
      */
-    attachMediaElement(mediaElement) 
-    {
-        this.m_Convert.attachMediaElement(mediaElement);
+    attachMediaElement(mediaElement,canvasElement) 
+    {               
+        this.m_PlayerImp.attachMediaElement(mediaElement,canvasElement,this.m_MarkText,this.m_NeedMark,this.m_NeedDownload);
     }
+    setTransCodec(iVideoEnable,strDstVideoEncodec,iAudioEnable,strDstAudioEncodec,strDstAudioSample) 
+	{
+		this.m_PlayerImp.setTransCodec(iVideoEnable,strDstVideoEncodec,iAudioEnable,strDstAudioEncodec,strDstAudioSample);  
+	}
     play() 
     {
         if(".flv"==this.m_URL.substring(this.m_URL.length - 4))
         {
             this.m_SrcType = ".flv";
         }
-        else if(".dat"==this.m_URL.substring(this.m_URL.length - 4))
+        else if(".dat"==this.m_URL.substring(this.m_URL.length - 4)||".pri"==this.m_URL.substring(this.m_URL.length - 4))
         {
             this.m_SrcType = ".pri";
         }
@@ -48,6 +65,8 @@ class player
             console.error('unsupport url data : ', this.m_URL); 
             return;            
         }
+
+        this.m_PlayerImp.play();
         
         if("http"==this.m_URL.substring(0,4) || "https"==this.m_URL.substring(0,5))
         {
@@ -66,11 +85,11 @@ class player
     
     detachMediaElement() 
     {
-        this.m_Convert.detachMediaElement()
+        //this.m_PlayerImp.detachMediaElement()
     }
     destroy() 
     {
-        this.m_Convert.destroy()
+        this.m_PlayerImp.destroy();
     }
     async HandleHttpReq(url) 
     {  
@@ -91,10 +110,11 @@ class player
                 if (done) 
                 {  
                     console.log('读取完成:', receivedLength);  
+                    this.m_PlayerImp.close();
                     break; // 读取完成  
                 }  
                 receivedLength += value.byteLength; // 更新总字节数  
-                this.m_Convert.inputDataChunk(value, this.m_SrcType, this.m_DstType); 
+                this.m_PlayerImp.process(value,this.m_SrcName,this.m_SrcType,this.m_DstType); 
             }  
         } 
         catch (error) 
@@ -149,7 +169,7 @@ class player
         // 这里可以处理实时接收到的数据  
         const chunk = xhr.response; // 或者 xhr.response（根据 responseType）  
         // 输入数据块进行转换
-        this.m_Convert.inputDataChunk(chunk, this.m_SrcType, this.m_DstType);  
+        this.m_PlayerImp.process(chunk,this.m_SrcName,this.m_SrcType,this.m_DstType); 
     }
     HandleWsURL(url) 
     {  
@@ -171,6 +191,7 @@ class player
         socket.onclose = function () 
         {  
             console.log('WebSocket connection closed.');  
+            this.m_PlayerImp.close();
         };  
 
         // 处理错误的回调  
@@ -192,8 +213,8 @@ class player
     {
         // 这里可以处理实时接收到的数据  
         const arrayBuffer = event.target.result; // 获取 ArrayBuffer   
-        // 输入数据块进行转换
-        this.m_Convert.inputDataChunk(arrayBuffer, this.m_SrcType, this.m_DstType);  
+        // 输入数据块进行转换 
+        this.m_PlayerImp.process(arrayBuffer,this.m_SrcName,this.m_SrcType,this.m_DstType); 
     }
 }
 
@@ -215,7 +236,7 @@ function createPlayer(mediaDataSource)
         console.log('MediaDataSource must has url field to indicate video file url!');
     }
 
-    return new player(mds.url);
+    return new player(mds.type,mds.url,mds.needSoftDecode,mds.needDownload,mds.needMark,mds.markText);
 }
 
 // interfaces
@@ -223,4 +244,4 @@ let playerjs = {};
 
 playerjs.createPlayer = createPlayer;
 
-//export default playerjs;
+export default playerjs;

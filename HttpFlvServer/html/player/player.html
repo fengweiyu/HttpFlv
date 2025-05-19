@@ -4,30 +4,65 @@
   </head>
 
   <body>
-    <script type="text/javascript" src="./common.js"></script>
-    <script type="text/javascript" src="./player.js"></script>
-    <script type="text/javascript" src="./ChunkConvert.js"></script>
-    <script type="text/javascript" src="./MediaConvert.js"></script>
+
+    <!--script type="text/javascript" src="./player.js"></script-->
     <center>
-      <h1><a href="">http-flv/ws-dat/ws-flv demo</a></h1>
-      <textarea name="" id="UrlInput" cols="80" rows="2"></textarea>
-      <div class="box">
-        <button id="startButton">start</button>
-        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<button id="stopButton">stop</button>
-        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<button id="h264Button">h264</button>
-        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<button id="h265Button">h265</button>
-        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<button id="defaultButton">default</button>
-      </div>
-      <video id="videoElement" playsinline controls autoplay muted style="width: 80%;height: auto;"></video>
-      </br>
-      <input style="width:30px" type="text" name="seekpoint" />
-      <button οnclick="flv_seekto()">seek</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-      <label>  
-        <input id="checkboxReconnect" type="checkbox" checked> reconnect  
-     </label>
+        <h1><a href="">http-flv/ws-dat/ws-flv demo</a></h1>
+            <textarea name="" id="UrlInput" cols="120" rows="3"></textarea>
+            <div class="box">
+                <button id="startButton">start</button>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<button id="stopButton">stop</button>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<button id="h264Button">http-flv</button>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<button id="h265Button">ws-dat</button>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<button id="defaultButton">ws-flv</button>
+            </div>
+            </br>
+            <label>  
+                <input id="softDecode" type="checkbox" name="options" value="OriginalData">软解  
+            </label> 
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            <label>  
+                <input id="download" type="checkbox" name="options" value="download">下载  
+            </label> 
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            <textarea name="" id="markInput" cols="30" rows="1"></textarea>
+            <label>  
+                <input id="mark" type="checkbox" name="mark" value="shuiying">水印 
+            </label>
+            </br>
+            <video id="videoElement" playsinline controls autoplay muted style="width: 80%;height: auto;"></video>
+            <canvas id="myCanvas" style="width: 80%;height: auto;display: none;"></canvas>
+            </br>
+            <select id="videoCodec">  
+                <option value="h264">h264</option>   
+            </select>
+            <label>  
+                <input id="videoCodecChange" type="checkbox" name="videoCodecChange" value="videoCodecChange">视频转码 
+            </label>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            <select id="audioCodec">  
+                <option value="aac">aac</option>   
+                <option value="g711a">g711a</option>
+            </select>
+            <select id="audioCodecSampleRate">  
+                <option value="44100">44100</option>   
+                <option value="8000">8000</option>
+            </select>
+            <label>  
+                <input id="audioCodecChange" type="checkbox" name="audioCodecChange" value="audioCodecChange">音频转码 
+            </label>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            <input style="width:30px" type="text" name="seekpoint" />
+            <button οnclick="flv_seekto()">seek</button>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            <label>  
+                <input id="checkboxReconnect" type="checkbox" checked> reconnect  
+            </label>
     </center>
 
-    <script>
+    <script type="module">
+        import playerjs from './player.js';
+
         const startButton = document.getElementById('startButton');
         const stopButton = document.getElementById('stopButton');
         const h264Button = document.getElementById('h264Button');
@@ -36,26 +71,45 @@
         const UrlInput = document.getElementById('UrlInput');
         const checkboxReconnect = document.getElementById('checkboxReconnect');
         const h264URL = 'https://yuweifeng.top:9215/file/H264AAC.flv/test.flv';  
-        const h265URL = 'https://yuweifeng.top:9215/file/H265AAC.flv/test_enhanced.flv'; 
-        UrlInput.value = h265URL
+        const h265URL = 'https://yuweifeng.top:9215/file/H265AAC.flv/test_enhanced.flv';
+        const flvURL = 'https://media.jftech.pro:9015/live/S-11010911041321000001_0_1/M3xTLTExMDEwOTExMDQxMzIxMDAwMDAxfDFhOTRiZDNiMDI1MTI1ODM3M2Q5ZDE3NmVkNDZjZDA5YT4ZkZDNkODUxN2YxZDY1NGViZjM3MjBjZDg4MDg5YjJ8Zmx2fDE3NDI1NDIwMDZ8MTc3MjY0MDAwMA%3D%3D.55ccb4079d561737555fff62ae9042f4.flv';         
+        const datURL='ws://media.jftech.pro:9017/live/S-11010911041321000001_0_1/M3xTLTExMDEwOTExMDQxMzIxMDAwMDAxfGZiM2MwN2U4YWY2ODllNzcxYWFhMGZmMzFlMWU1MmFm2NzcxNjA4NDYzZDY1NDBhMmRlMmE0MTg2ZDhkYWVhODZ8d3N8MTc0MjU0MjAwNXwxNzcyNjQwMDAw.27de18699ff1cedd29be8f10315e2582.dat'
+        const wsFLVURL='ws://media.jftech.pro:9017/live/S-11010911041321000001_0_1/M3xTLTExMDEwOTExMDQxMzIxMDAwMDAxfDY2NDlmNzM0MjhiNDlmNGJiZDI5Y2QwMmRlY2M0OTMx3ZDJiMzdmMjdmMzg0MTkyMDE3MzRjMmUyNTAwYWNhYTl8d3N8MTc0MjU0MjAwNXwxNzcyNjQwMDAw.22d37acb1bab71d38b06f23068c8621d.flv'
+        UrlInput.value = datURL
         startButton.addEventListener('click', setEnable);
         stopButton.addEventListener('click', setDisable);
         h264Button.addEventListener('click', setH264);
         h265Button.addEventListener('click', setH265);
         defaultButton.addEventListener('click', setDefault);
+
+        const selectVideoCodec = document.getElementById('videoCodec');  
+        const selectAudioCodec = document.getElementById('audioCodec');  
+        const selectAudioCodecSampleRate = document.getElementById('audioCodecSampleRate');
+        const videoCodecChangeChecked = document.getElementById('videoCodecChange');
+        const audioCodecChangeChecked = document.getElementById('audioCodecChange');
+
+        const markChecked = document.getElementById('mark');
+        const markInput = document.getElementById('markInput');
+        const mark = 'yuweifeng08016';  
+        markInput.value = mark;
+        const softDecodeChecked = document.getElementById('softDecode');
+        const downloadChecked = document.getElementById('download');
+        var canvasElement = document.getElementById('myCanvas'); 
         var videoElement = document.getElementById('videoElement');
+
+
         var Player = null;
         function setH264() 
         {
-            UrlInput.value = h264URL
+            UrlInput.value = h264URL //flvURL
         }
         function setH265() 
         {
-            UrlInput.value = h265URL; 
+            UrlInput.value = h265URL //datURL; 
         }
         function setDefault() 
         {
-            UrlInput.value = h264URL; 
+            UrlInput.value = wsFLVURL; 
         }
         function setEnable() 
         {
@@ -64,9 +118,12 @@
                 url: UrlInput.value,					//flv格式媒体URL
                 //hasAudio: true,				//数据源是否包含有音频，可以不设置内部代码会自己探测
                 hasVideo: true,					//数据源是否包含有视频
+                needSoftDecode:softDecodeChecked.checked,
+                needDownload:downloadChecked.checked,
+                needMark:markChecked.checked,
+                markText:markInput.value,
             });
-            Player.attachMediaElement(videoElement);	//将播放实例注册到节点
-            Player.play();					//播放数据流
+            Process();
         }
         function setDisable() 
         {
@@ -77,8 +134,17 @@
                 Player = null;
             }
         }
-
-
+        function Process() 
+        {
+            if(!Player.getInitedFlag())
+            {
+                setTimeout(Process,100);
+                return;
+            }
+            Player.attachMediaElement(videoElement,canvasElement);	//将播放实例注册到节点
+            Player.setTransCodec(videoCodecChangeChecked.checked,selectVideoCodec.value,audioCodecChangeChecked.checked,selectAudioCodec.value,selectAudioCodecSampleRate.value);
+            Player.play();					//播放数据流
+        }
 
         function seekto() 
         {
