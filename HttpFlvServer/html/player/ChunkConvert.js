@@ -1,8 +1,12 @@
  
 
 self.Module ={
-	onRuntimeInitialized : function () {
+	onRuntimeInitialized : async function () {
 		console.log('Wasm module initialized');
+        // 写入自定义字体文件 
+        const fontResponse = await fetch('msyh.ttf');  
+        const fontArrayBuffer = await fontResponse.arrayBuffer();
+        Module.FS.writeFile('msyh.ttf', new Uint8Array(fontArrayBuffer)); 
 	}
 	
 }
@@ -27,6 +31,7 @@ class convert {
 		this.m_AccumulatedBuffer = new Uint8Array(0); // 累计缓冲区
 		this.m_AccumulatedSize = 0; // 累计大小
         this.m_DownBuffer = new Uint8Array(0); // 累计缓冲区
+        this.m_BufferQueue = []; // 数据队列，用于存储转换后的帧数据与帧信息
     }
 
     /**
@@ -62,9 +67,21 @@ class convert {
      * 处理 SourceBuffer 更新结束事件
      */
     handleUpdateEnd() {
-        if (this.m_Queue.length > 0 && !this.m_IsPaused) {
+        //console.log("handleUpdateEnd",this.m_BufferQueue.length);
+        /*if (this.m_Queue.length > 0 && !this.m_IsPaused) {
             //this.processQueue(); // 继续处理队列中的数据
+        }*/
+        if (this.m_BufferQueue.length > 0) 
+        {
+            const dequeuedObject = this.m_BufferQueue.shift(); // 从队列中取出一个数据块
+            try {
+                this.m_SourceBuffer.appendBuffer(dequeuedObject.data);
+            } catch (error) {
+                console.error('Failed to append buffer:', error);
+                //this.m_Queue.unshift({ data, srcType, dstType }); // 如果失败，将数据块重新放回队列
+            }
         }
+
     }
 
     /**
@@ -139,8 +156,13 @@ class convert {
         this.m_IsConverting = true;
 
         const { data, srcType, dstType } = this.m_Queue.shift(); // 从队列中取出一个数据块
-        const convertedChunk = this.convert(data, srcType, dstType);
-
+        this.convert(data, srcType, dstType);
+        var convertedChunk = null; 
+        if (this.m_BufferQueue.length > 1) 
+        {
+            const dequeuedObject = this.m_BufferQueue.shift(); // 从队列中取出一个数据块
+            convertedChunk=dequeuedObject.data;
+        }
         if (convertedChunk) {
             if(!this.m_SourceBuffer)
             {
@@ -169,6 +191,7 @@ class convert {
                 {
                     this.m_SourceBuffer = this.m_MediaSource.addSourceBuffer('video/mp4; codecs="'+VideoCodec+','+AudioCodec+'"');
                     this.m_MediaElement.style.display = 'block'; // 显示视频 = 'none'; // 隐藏视频  
+                    this.m_SourceBuffer.addEventListener('updateend', this.handleUpdateEnd.bind(this));
                 }
                 else if(null != VideoCodec)
                 {
@@ -185,24 +208,31 @@ class convert {
                     console.log('GetMediaDstEnc err v '+VideoCodec+' a '+AudioCodec);    
                 }
             }
+            
+            if( this.m_DownBuffer==null)
+                this.m_DownBuffer=convertedChunk;
+            else
+            {
+                //this.m_DownBuffer=this.appendTypedArray(this.m_DownBuffer,convertedChunk);
+                if(this.m_DownBuffer.length>=4*512*1024)
+                {
+                    //DownloadMedia(this.m_DownBuffer,"666666.mp4");
+                    //this.m_DownBuffer=null;
+                }
+            }
             try {
                 this.m_SourceBuffer.appendBuffer(convertedChunk);
-                if( this.m_DownBuffer==null)
-                    this.m_DownBuffer=convertedChunk;
-                else
-                {
-                    //this.m_DownBuffer=this.appendTypedArray(this.m_DownBuffer,convertedChunk);
-                    if(this.m_DownBuffer.length>=256*1024)
-                    {
-                        //DownloadMedia(this.m_DownBuffer,"123123.mp4");
-                        //this.m_DownBuffer=null;
-                    }
-                }
-
             } catch (error) {
                 console.error('Failed to append buffer:', error);
                 //this.m_Queue.unshift({ data, srcType, dstType }); // 如果失败，将数据块重新放回队列
             }
+            /*try {
+                this.m_SourceBuffer.appendBuffer(convertedChunk);
+            } catch (error) {
+                console.error('Failed to append buffer:', error);
+                //this.m_Queue.unshift({ data, srcType, dstType }); // 如果失败，将数据块重新放回队列
+            }*/
+
             //Module._Clean();
             //this.convert(data, srcType, dstType);
         } else {
@@ -239,7 +269,7 @@ class convert {
     convert(srcBuffer, srcType, dstType) {
         if (!srcBuffer || srcBuffer.byteLength === 0) {
             console.error('Invalid source buffer');
-            return null;
+            return;
         }
 
         const arrDstType = intArrayFromString(dstType).concat(0);
@@ -258,28 +288,56 @@ class convert {
 
         const bufDstMaxLen = uint8View.byteLength + (10 * 1024 * 1024);
         const bufDstFrame = Module._malloc(bufDstMaxLen);
+        const bufDstInfoMaxLen = 80;
+        const bufDstInfo = Module._malloc(bufDstInfoMaxLen);
         let ret = 0;
         let len = 0;
 
         do {
-            len += ret;
-            ret = Module._GetData(bufDstFrame + len, bufDstMaxLen - len);
-        } while (ret > 0);
+            ret = Module._GetData(bufDstFrame, bufDstMaxLen,bufDstInfo,bufDstInfoMaxLen);
+            if(ret <= 0)
+            {
+                break;                   
+            }
+            len = ret;
+            const convertedChunk = new Uint8Array(len);
+            convertedChunk.set(new Uint8Array(Module.HEAPU8.buffer, bufDstFrame, len));
+            const convertedInfo = new Int32Array(bufDstInfoMaxLen);
+            convertedInfo.set(new Int32Array(Module.HEAP32.buffer, bufDstInfo, bufDstInfoMaxLen));
+            const haveKeyFrame = convertedInfo[0]; // 第一个元素表示是否有i帧，第二个元素是开始时间，第三个元素是持续时间
+            const startTime = convertedInfo[1]; // 
+            const durationTime = convertedInfo[2]; //
+            const videoCnt = convertedInfo[3]; // 
+            const audioCnt = convertedInfo[4]; //
+            var absTimeHigh = BigInt(convertedInfo[5]); // Convert to BigInt  
+            var absTimeLow = BigInt(convertedInfo[6]);  // Convert to BigInt  
+            const absTimeS = convertedInfo[7]; //
+            // Combine the two values  
+            const absTime = (absTimeHigh << BigInt(32)) | absTimeLow; // Use | for combined value  
+            // 创建 Date 对象  
+            const absTimeNumber =absTimeS*1000;//Number(absTime);
+            const date = new Date(absTimeNumber);  //absTime.toString()
+            // 格式化时间  
+            const formattedDate = date.toLocaleString('zh-CN', {  
+                year: 'numeric',  
+                month: '2-digit',  
+                day: '2-digit',  
+                hour: '2-digit',  
+                minute: '2-digit',  
+                second: '2-digit',  
+                //fractionalSecondDigits: 3, // 显示毫秒  
+                hour12: false, // 24小时制
+            });  
+            this.m_BufferQueue.push({ data: convertedChunk, haveKeyFrame,startTime,durationTime});
+            console.log('convertedChunk haveKeyFrame '+haveKeyFrame+' startTime '+startTime+' durationTime '+durationTime+' videoCnt '+videoCnt+' audioCnt '+audioCnt+' absTime '+formattedDate); 
+        } while (1);
 
-        const convertedChunk = new Uint8Array(len);
-        convertedChunk.set(new Uint8Array(Module.HEAPU8.buffer, bufDstFrame, len));
 
         Module._free(bufDstType);
         Module._free(bufSrcType);
         Module._free(bufSrcFrame);
         Module._free(bufDstFrame);
-
-        if (convertedChunk.length > 0) {
-            return convertedChunk;
-        } else {
-            //console.error('Conversion failed: empty result');
-            return null;
-        }
+        Module._free(bufDstInfo);
     }
 
     /**

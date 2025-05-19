@@ -64,5 +64,15 @@ function customLog(...args)
 	originalLog.apply(console, [`[${timeStamp}]`, ...args]);  
 } 
 console.log = customLog;  // 替换默认的 console.log  
-// export { customLog,DownloadMedia };//命名导出   import { functionName } from '...' 必须导出，否则就算外部包含了所以，还是会报错未定义
- 
+export { customLog,DownloadMedia };//命名导出   import { functionName } from '...' 必须导出，否则就算外部包含了所以，还是会报错未定义
+//export default customLog; // 默认导出  import anyName from '...'
+
+/*export { DownloadMedia }; 
+// 封装 console.log  
+function customLog(...args) {  
+    console.log('[Custom Log]', ...args); // 添加自定义前缀  
+}  
+// 替换默认的 console.log  
+console.log = customLog;  
+// 导出自定义的 console.log (可选)  
+export { customLog };  */
