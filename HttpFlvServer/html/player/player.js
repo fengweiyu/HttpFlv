@@ -188,11 +188,7 @@ class player
         socket.onmessage = this.HandleWsBlob.bind(this);
 
         // 连接关闭时的回调  
-        socket.onclose = function () 
-        {  
-            console.log('WebSocket connection closed.');  
-            this.m_PlayerImp.close();
-        };  
+        socket.onclose = this.HandleWsClose.bind(this);
 
         // 处理错误的回调  
         socket.onerror = function (error) 
@@ -201,6 +197,15 @@ class player
         }; 
   
     } 
+    HandleWsClose(event) 
+    {
+        console.log('WebSocket closed with code:', event.code);  
+        if (event.reason) 
+        {  
+            console.log('WebSocket closed with Reason:', event.reason);  
+        } 
+        this.m_PlayerImp.close();
+    }
     HandleWsBlob(event) 
     {
         const blob = event.data; // 获取接收到的 Blob 数据  

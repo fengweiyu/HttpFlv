@@ -1,5 +1,6 @@
 <html>
   <head>
+    <meta charset="UTF-8"> 
     <title>http-flv ws-dat ws-flv demo</title>
   </head>
 
@@ -12,7 +13,7 @@
             <div class="box">
                 <button id="startButton">start</button>
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<button id="stopButton">stop</button>
-                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<button id="h264Button">http-flv</button>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<button id="h264Button">https-flv</button>
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<button id="h265Button">ws-dat</button>
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<button id="defaultButton">ws-flv</button>
             </div>
@@ -72,10 +73,11 @@
         const checkboxReconnect = document.getElementById('checkboxReconnect');
         const h264URL = 'https://yuweifeng.top:9215/file/H264AAC.flv/test.flv';  
         const h265URL = 'https://yuweifeng.top:9215/file/H265AAC.flv/test_enhanced.flv';
-        const flvURL = 'https://media.jftech.pro:9015/live/S-11010911041321000001_0_1/M3xTLTExMDEwOTExMDQxMzIxMDAwMDAxfDFhOTRiZDNiMDI1MTI1ODM3M2Q5ZDE3NmVkNDZjZDA5YT4ZkZDNkODUxN2YxZDY1NGViZjM3MjBjZDg4MDg5YjJ8Zmx2fDE3NDI1NDIwMDZ8MTc3MjY0MDAwMA%3D%3D.55ccb4079d561737555fff62ae9042f4.flv';         
-        const datURL='ws://media.jftech.pro:9017/live/S-11010911041321000001_0_1/M3xTLTExMDEwOTExMDQxMzIxMDAwMDAxfGZiM2MwN2U4YWY2ODllNzcxYWFhMGZmMzFlMWU1MmFm2NzcxNjA4NDYzZDY1NDBhMmRlMmE0MTg2ZDhkYWVhODZ8d3N8MTc0MjU0MjAwNXwxNzcyNjQwMDAw.27de18699ff1cedd29be8f10315e2582.dat'
-        const wsFLVURL='ws://media.jftech.pro:9017/live/S-11010911041321000001_0_1/M3xTLTExMDEwOTExMDQxMzIxMDAwMDAxfDY2NDlmNzM0MjhiNDlmNGJiZDI5Y2QwMmRlY2M0OTMx3ZDJiMzdmMjdmMzg0MTkyMDE3MzRjMmUyNTAwYWNhYTl8d3N8MTc0MjU0MjAwNXwxNzcyNjQwMDAw.22d37acb1bab71d38b06f23068c8621d.flv'
-        UrlInput.value = datURL
+        const flvURL = 'http://gwm-000-cn-0448.bcloud365.net:9014/live/S-11010101011327000245/Mnx8ZDIzNTQxYTgzYzk1YjVkZWY4NWJlMjliN2Q1MWRlY2J8fFMtMTEwMTAxMDEwMTEzMjcwMDAyNDV8fDA3NTE5OGQ1ZGZlN2I2Mjg2NjU4ND8JkMDI3YTZmYzRhZDgxODZhOTAwYzI5YzJiYjQzNTk1NzI4ODhjYThlY2F8fGZsdnx8MTc0Nzk5MTU4MDg3OHx8MTg0MzI5MDEzNTAwMHx8R1dN.f27091834b867586e470ccd1774aee65.flv';         
+        const flvsURL = 'https://gwm-000-cn-0448.bcloud365.net:9015/live/S-11010101011327000245/Mnx8ZDIzNTQxYTgzYzk1YjVkZWY4NWJlMjliN2Q1MWRlY2J8fFMtMTEwMTAxMDEwMTEzMjcwMDAyNDV8fDA3NTE5OGQ1ZGZlN2I2Mjg2NjU4ND8JkMDI3YTZmYzRhZDgxODZhOTAwYzI5YzJiYjQzNTk1NzI4ODhjYThlY2F8fGZsdnx8MTc0Nzk5MTU4MDg3OHx8MTg0MzI5MDEzNTAwMHx8R1dN.f27091834b867586e470ccd1774aee65.flv';         
+        const datURL='ws://gwm-000-cn-0448.bcloud365.net:9017/live/S-11010101011327000245/Mnx8ZDIzNTQxYTgzYzk1YjVkZWY4NWJlMjliN2Q1MWRlY2J8fFMtMTEwMTAxMDEwMTEzMjcwMDAyNDV8fGUxNGMwZjY4NzNiMzQyNTJiYzg2ZD3c4NDE2NWQzOWVmZGZlOTBhODRjMzAzNWE1MGEwZGRmZjhjY2JiMzRiODR8fHdzfHwxNzQ3OTkxNTgxMDAwfHwxODQzMjkwMTM1MDAwfHxHV00%3D.a7d22d3f6141cb777796bdd6dfe9f66c.dat'
+        const wsFLVURL='ws://gwm-000-cn-0448.bcloud365.net:9017/live/S-11010101011327000245/Mnx8ZDIzNTQxYTgzYzk1YjVkZWY4NWJlMjliN2Q1MWRlY2J8fFMtMTEwMTAxMDEwMTEzMjcwMDAyNDV8fGFjNDBlZWUwM2RkYWJhNGU0ZGZjZj8E3Yjc5NmU3NmYzNjc1NzY0ZWFiN2FmZTMxZjFlMTU3YTI2ZjFjMTJhZTJ8fHdzfHwxNzQ3OTkxNzYxMTYzfHwxODQzMjkwMTM1MDAwfHxHV00%3D.414ae4e9c2966548b08c5f204afb99c2.flv'
+        UrlInput.value = flvURL
         startButton.addEventListener('click', setEnable);
         stopButton.addEventListener('click', setDisable);
         h264Button.addEventListener('click', setH264);
@@ -101,11 +103,11 @@
         var Player = null;
         function setH264() 
         {
-            UrlInput.value = h264URL //flvURL
+            UrlInput.value = h264URL //flvURL h264URL flvsURL
         }
         function setH265() 
         {
-            UrlInput.value = h265URL //datURL; 
+            UrlInput.value = h265URL //datURL; h265URL
         }
         function setDefault() 
         {
