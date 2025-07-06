@@ -23,7 +23,7 @@
 using std::thread;
 
 #define HTTP_FLV_IO_SEND_MAX_LEN (10240)
-#define HTTP_FLV_IO_RECV_MAX_LEN (200*1024) //(1*1024*1024)
+#define HTTP_FLV_IO_RECV_MAX_LEN (500*1024) //(1*1024*1024)
 
 typedef enum HttpFlvClientState
 {
@@ -265,13 +265,13 @@ int HttpFlvClientIO :: Proc(const char * i_strHttpURL,int i_iOutSize)
                     HTTP_FLV_LOGE("m_pHttpFlvClient->ParseHttpMedia err exit %s,%s\r\n",strIP.c_str(),pcRecvBuf);
                     break;
                 }
+                snprintf(strFilePath,sizeof(strFilePath),"%s/%s.%s",strFileDir.c_str(),strFileName.substr(0,31).c_str(),"flv.flv");
+                this->SaveFile((const char *)strFilePath,pcFileBuf,iFileLen);
                 eHttpFlvClientState=HTTP_FLV_CLIENT_HANDLE_FLV;
                 break;
             }
             case HTTP_FLV_CLIENT_HANDLE_FLV:
             {
-                snprintf(strFilePath,sizeof(strFilePath),"%s/%s.%s",strFileDir.c_str(),strFileName.substr(0,31).c_str(),"flv.flv");
-                this->SaveFile((const char *)strFilePath,pcFileBuf,iFileLen);
                 iProcessedLen=0;
                 while(iFileLen-iProcessedLen > 0)
                 {
@@ -301,7 +301,6 @@ int HttpFlvClientIO :: Proc(const char * i_strHttpURL,int i_iOutSize)
                         this->SaveFile((const char *)strFilePath,tMuxStream.pStreamData,tMuxStream.iStreamDataLen);
                     } 
                 }
-                
                 if(i_iOutSize<=0)
                 {//表示取完流
                     memmove(pcRecvBuf,pcFileBuf+iProcessedLen,iFileLen-iProcessedLen);
@@ -315,6 +314,11 @@ int HttpFlvClientIO :: Proc(const char * i_strHttpURL,int i_iOutSize)
                     if(iRecvLen<=0)
                     {
                         HTTP_FLV_LOGE("TcpClient::Recv iRecvLen err %d\r\n",iTryTime);
+                    }
+                    else
+                    {
+                        snprintf(strFilePath,sizeof(strFilePath),"%s/%s.%s",strFileDir.c_str(),strFileName.substr(0,31).c_str(),"flv.flv");
+                        this->SaveFile((const char *)strFilePath,pcRecvBuf+iFileLen,iRecvLen);
                     }
                     pcFileBuf=pcRecvBuf;
                     iFileLen+=iRecvLen;
