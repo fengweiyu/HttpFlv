@@ -38,6 +38,8 @@ private:
     
     HttpFlvClientSession m_HttpFlvClientSession;
     T_MediaFrameInfo m_tFrameInfo;
+    unsigned char * m_pbParseBuf;
+    int m_iParseCurLen;
     unsigned char * m_pbMuxBuf;
 };
 

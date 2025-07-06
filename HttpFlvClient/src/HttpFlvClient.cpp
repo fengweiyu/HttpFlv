@@ -171,15 +171,14 @@ int LinuxCRegex(const char *i_strPattern,char *i_strBuf,string * o_aMatch,int i_
 ******************************************************************************/
 HttpFlvClient::HttpFlvClient()
 {
-    m_tFrameInfo.pbFrameBuf = new unsigned char [HTTP_FLV_BUF_MAX_LEN];
-    if(NULL == m_tFrameInfo.pbFrameBuf)
+    m_pbParseBuf = new unsigned char [HTTP_FLV_BUF_MAX_LEN];
+    if(NULL == m_pbParseBuf)
     {
         HTTP_FLV_LOGE("NULL == m_tFileFrameInfo.pbFrameBuf err\r\n");
         return;
     } 
-    m_tFrameInfo.iFrameBufMaxLen = HTTP_FLV_BUF_MAX_LEN;
-    m_tFrameInfo.iFrameBufLen=0;
-    m_tFrameInfo.iFrameProcessedLen=0;
+    m_iParseCurLen=0;
+    memset(&m_tFrameInfo,0,sizeof(T_MediaFrameInfo));
 
     m_pbMuxBuf = new unsigned char [HTTP_FLV_BUF_MAX_LEN];
     if(NULL == m_pbMuxBuf)
@@ -199,6 +198,15 @@ HttpFlvClient::HttpFlvClient()
 ******************************************************************************/
 HttpFlvClient::~HttpFlvClient()
 {
+    if(NULL != m_pbParseBuf)
+    {
+        delete [] m_pbParseBuf;
+    } 
+    if(NULL != m_pbMuxBuf)
+    {
+        delete [] m_pbMuxBuf;
+    } 
+
 }
 /*****************************************************************************
 -Fuction        : ParseHttpURL
@@ -350,21 +358,30 @@ int HttpFlvClient::HandleHttpMedia(char * i_pcHttpMedia,int i_iMediaLen,T_FlvCli
     int iRet = -1;
     T_HttpResPacket tHttpResPacket;
     
-    if(NULL == i_pcHttpMedia || i_iMediaLen <= 0)
+    if(NULL == i_pcHttpMedia || i_iMediaLen <= 0)// || i_iMediaLen+m_iParseCurLen > HTTP_FLV_BUF_MAX_LEN)
     {
-        HTTP_FLV_LOGE("HandleHttpMedia NULL \r\n");
+        HTTP_FLV_LOGE("HandleHttpMedia NULL %d %d\r\n",i_iMediaLen,m_iParseCurLen);
         return iRet;
     }
-    memcpy(m_tFrameInfo.pbFrameBuf,i_pcHttpMedia,i_iMediaLen);
+    //memcpy(m_pbParseBuf+m_iParseCurLen,i_pcHttpMedia,i_iMediaLen);
+    //m_iParseCurLen+=i_iMediaLen;
+
+    m_tFrameInfo.pbFrameBuf=(unsigned char *)i_pcHttpMedia;//外部偏移处理，内部不需要再处理
+    m_tFrameInfo.iFrameBufMaxLen = HTTP_FLV_BUF_MAX_LEN;
     m_tFrameInfo.iFrameBufLen = i_iMediaLen;
     m_tFrameInfo.iFrameLen=0;
     m_tFrameInfo.iFrameProcessedLen=0;
     m_tFrameInfo.eStreamType=STREAM_TYPE_FLV_STREAM;
     iRet = m_HttpFlvClientSession.GetFrame(&m_tFrameInfo);
+    if(m_tFrameInfo.iFrameProcessedLen>0)
+    {
+        //memmove(m_pbParseBuf,m_pbParseBuf+m_tFrameInfo.iFrameProcessedLen,m_iParseCurLen-m_tFrameInfo.iFrameProcessedLen);
+        //m_iParseCurLen = m_iParseCurLen-m_tFrameInfo.iFrameProcessedLen;
+    }
     if(m_tFrameInfo.iFrameLen <= 0)
     {
-        HTTP_FLV_LOGE("m_tFileFrameInfo.iFrameLen <= 0 %d\r\n",m_tFrameInfo.iFrameBufLen);
-        return iRet;
+        HTTP_FLV_LOGE("m_tFileFrameInfo.iFrameLen <= 0 ,%d %d %d\r\n",m_tFrameInfo.iFrameBufLen,m_iParseCurLen,m_tFrameInfo.iFrameProcessedLen);
+        return m_tFrameInfo.iFrameProcessedLen>0?m_tFrameInfo.iFrameProcessedLen:-1;
     } 
 
     if(NULL != o_ptVideoStream && (m_tFrameInfo.eFrameType == MEDIA_FRAME_TYPE_VIDEO_I_FRAME ||
@@ -426,7 +443,7 @@ int HttpFlvClient::HandleHttpMedia(char * i_pcHttpMedia,int i_iMediaLen,T_FlvCli
         if(iRet == 0)
         {
             HTTP_FLV_LOGE("FrameToContainer need more data %d\r\n",iRet);
-            return iRet;
+            return m_tFrameInfo.iFrameProcessedLen;
         }
         o_ptMuxStream->pStreamData=(char *)m_pbMuxBuf;
         o_ptMuxStream->iStreamDataLen=iRet;
