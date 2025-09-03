@@ -119,7 +119,7 @@ int HttpFlvClientIO :: Proc(const char * i_strHttpURL,int i_iOutSize)
     }
     if(i_iOutSize>0)
     {
-        iOutSize=i_iOutSize*1024*1024;
+        iOutSize=i_iOutSize*1024;
     }
     else
     {

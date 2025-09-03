@@ -43,7 +43,7 @@ int main(int argc, char* argv[])
         delete pHttpFlvClientDemo;
         return iRet;
     }
-    iRet=pHttpFlvClientDemo->Proc(argv[1],atoi(argv[2]));//阻塞
+    iRet=pHttpFlvClientDemo->Proc(argv[1],atoi(argv[2]));//阻塞 第二个参数kB
     delete pHttpFlvClientDemo;
     return iRet;
 }
@@ -61,7 +61,7 @@ static void PrintUsage(char *i_strProcName)
 {
     printf("Usage: %s inputURL (this will Generate files in ./*.flv *.h264 or *.h265 *.aac or *.g711a)\r\n",i_strProcName);
     printf("eg: %s http://localhost:9214/file/H264AAC.flv/test.flv\r\n",i_strProcName);
-    printf("or: %s inputURL outputSIZE(unit MB) \r\n",i_strProcName);
+    printf("or: %s inputURL outputSIZE(unit KB) \r\n",i_strProcName);
     printf("eg: %s http://localhost:9214/file/H265AAC.flv/test_enhanced.flv 1\r\n",i_strProcName);
 }
 
